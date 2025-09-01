@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Management API Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #2c3e50, #e74c3c);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .auth-status {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .auth-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e74c3c;
+            font-size: 1.4em;
+        }
+
+        .endpoint-group {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .endpoint {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .endpoint:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .endpoint-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .method {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .get { background: #e3f2fd; color: #1976d2; }
+        .post { background: #e8f5e8; color: #388e3c; }
+        .patch { background: #fff3e0; color: #f57c00; }
+        .delete { background: #ffebee; color: #d32f2f; }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            height: 80px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-row-4 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
+        button {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .response-area {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .success { border-left: 4px solid #28a745; background: #f8fff9; }
+        .error { border-left: 4px solid #dc3545; background: #fff8f8; }
+
+        .quick-actions {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ffeaa7;
+        }
+
+        .quick-actions h4 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .quick-btn {
+            background: #f39c12;
+            margin: 5px;
+            padding: 8px 15px;
+            font-size: 12px;
+        }
+
+        .info-box {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+
+        .item-row {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .add-item-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .remove-item-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+            float: right;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-draft { background: #f8f9fa; color: #6c757d; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-paid { background: #d4edda; color: #155724; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+
+        .invoice-summary {
+            background: #e8f5e8;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .invoice-total {
+            font-size: 18px;
+            font-weight: bold;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Invoice Management API Test</h1>
+            <p>Test all invoice management endpoints for PitStop System</p>
+            <div class="auth-status">
+                <div>
+                    <strong>Authentication Status:</strong>
+                    <span id="authStatus">Not Authenticated</span>
+                </div>
+                <div>
+                    <strong>User Role:</strong>
+                    <span id="userRole">-</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Authentication Section -->
+            <div class="auth-section">
+                <h3>🔐 Authentication</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email:</label>
+                        <input type="email" id="authEmail" value="admin@pitstop.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password:</label>
+                        <input type="password" id="authPassword" value="admin123">
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button onclick="login()">Login</button>
+                    <button onclick="logout()">Logout</button>
+                    <button onclick="getProfile()">Get Profile</button>
+                </div>
+                <div id="authResponse" class="response-area" style="display: none;"></div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <h4>⚡ Quick Actions</h4>
+                <button class="quick-btn" onclick="quickSearch()">Quick Search</button>
+                <button class="quick-btn" onclick="getAllInvoices()">Load All Invoices</button>
+                <button class="quick-btn" onclick="getInvoiceStats()">Get Statistics</button>
+                <button class="quick-btn" onclick="fillSampleInvoice()">Sample Invoice Data</button>
+                <button class="quick-btn" onclick="clearAllResponses()">Clear All Responses</button>
+            </div>
+
+            <!-- Search & Browse Section -->
+            <div class="section">
+                <h3>🔍 Search & Browse Invoices</h3>
+                
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <h4>Search Invoices</h4>
+                        <span class="method get">GET</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Search Query:</label>
+                        <input type="text" id="searchQuery" placeholder="Search by invoice ID, notes...">
+                    </div>
+                    <button onclick="searchInvoices()">Search Invoices</button>
+                    <div id="searchResponse" class="response-area" style="display: none;"></div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <h4>Get All Invoices with Filters</h4>
+                        <span class="method get">GET</span>
+                    </div>
+                    <div class="form-row-4">
+                        <div class="form-group">
+                            <label>Status:</label>
+                            <select id="filterStatus">
+                                <option value="">All</option>
+                                <option value="draft">Draft</option>
+                                <option value="pending">Pending</option>
+                                <option value="paid">Paid</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Payment Method:</label>
+                            <select id="filterPaymentMethod">
+                                <option value="">All</option>
+                                <option value="cash">Cash</option>
+                                <option value="card">Card</option>
+                                <option value="bank_transfer">Bank Transfer</option>
+                                <option value="online">Online</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Page:</label>
+                            <input type="number" id="filterPage" value="1" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Limit:</label>
+                            <input type="number" id="filterLimit" value="10" min="1" max="50">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Date From:</label>
+                            <input type="date" id="filterDateFrom">
+                        </div>
+                        <div class="form-group">
+                            <label>Date To:</label>
+                            <input type="date" id="filterDateTo">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Min Amount:</label>
+                            <input type="number" id="filterMinAmount" placeholder="0" min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Max Amount:</label>
+                            <input type="number" id="filterMaxAmount" placeholder="10000" min="0" step="0.01">
+                        </div>
+                    </div>
+                    <button onclick="getAllInvoices()">Get All Invoices</button>
+                    <div id="getAllResponse" class="response-area" style="display: none;"></div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <h4>Get Invoice by Invoice ID</h4>
+                        <span class="method get">GET</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Invoice ID (e.g., INV00001):</label>
+                        <input type="text" id="getByInvoiceId" placeholder="INV00001">
+                    </div>
+                    <button onclick="getInvoiceByInvoiceId()">Get Invoice</button>
+                    <div id="getByInvoiceIdResponse" class="response-area" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Invoice Management Section -->
+            <div class="section">
+                <h3>💰 Invoice Management</h3>
+                
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <h4>Create New Invoice</h4>
+                        <span class="method post">POST</span>
+                    </div>
+                    <div class="warning-box">
+                        <strong>Prerequisites:</strong> You need a completed booking ID and customer ID. The booking must have status "completed" to create an invoice.
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Booking ID (MongoDB ObjectId):</label>
+                            <input type="text" id="createBookingId" placeholder="Completed booking's ObjectId" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Customer ID (MongoDB ObjectId):</label>
+                            <input type="text" id="createCustomerId" placeholder="Customer's ObjectId" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Invoice Items:</label>
+                        <div id="invoiceItems">
+                            <div class="item-row">
+                                <div class="form-row-4">
+                                    <div class="form-group">
+                                        <label>Description:</label>
+                                        <input type="text" class="item-description" placeholder="Oil change" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Quantity:</label>
+                                        <input type="number" class="item-quantity" placeholder="1" min="1" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Unit Price:</label>
+                                        <input type="number" class="item-price" placeholder="25.00" min="0" step="0.01" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Total:</label>
+                                        <input type="number" class="item-total" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="add-item-btn" onclick="addInvoiceItem()">+ Add Item</button>
+                    </div>
+
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label>Labor Charges:</label>
+                            <input type="number" id="createLaborCharges" placeholder="0" min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Tax Amount:</label>
+                            <input type="number" id="createTax" placeholder="0" min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Discount Amount:</label>
+                            <input type="number" id="createDiscount" placeholder="0" min="0" step="0.01">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Payment Method:</label>
+                            <select id="createPaymentMethod">
+                                <option value="">Select payment method</option>
+                                <option value="cash">Cash</option>
+                                <option value="card">Card</option>
+                                <option value="bank_transfer">Bank Transfer</option>
+                                <option value="online">Online</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Notes:</label>
+                            <textarea id="createNotes" placeholder="Additional notes..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="invoice-summary" id="invoiceSummary" style="display: none;">
+                        <h4>Invoice Summary</h4>
+                        <div>Subtotal: $<span id="summarySubtotal">0.00</span></div>
+                        <div>Tax: $<span id="summaryTax">0.00</span></div>
+                        <div>Discount: $<span id="summaryDiscount">0.00</span></div>
+                        <div class="invoice-total">Total: $<span id="summaryTotal">0.00</span></div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button onclick="calculateInvoiceTotal()">Calculate Total</button>
+                        <button onclick="createInvoice()">Create Invoice</button>
+                    </div>
+                    <div id="createResponse" class="response-area" style="display: none;"></div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <h4>Get Invoice by ID</h4>
+                        <span class="method get">GET</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Invoice ID (MongoDB ObjectId):</label>
+                        <input type="text" id="getByIdInvoiceId" placeholder="Invoice's MongoDB ObjectId">
+                    </div>
+                    <button onclick="getInvoiceById()">Get Invoice</button>
+                    <div id="getByIdResponse" class="response-area" style="display: none;"></div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <h4>Get Invoices by Customer</h4>
+                        <span class="method get">GET</span>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Customer ID:</label>
+                            <input type="text" id="customerInvoicesId" placeholder="Customer's MongoDB ObjectId">
+                        </div>
+                        <div class="form-group">
+                            <label>Status Filter:</label>
+                            <select id="customerInvoicesStatus">
+                                <option value="">All</option>
+                                <option value="draft">Draft</option>
+                                <option value="pending">Pending</option>
+                                <option value="paid">Paid</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="getInvoicesByCustomer()">Get Customer Invoices</button>
+                    <div id="customerInvoicesResponse" class="response-area" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Invoice Operations Section -->
+            <div class="section">
+                <h3>🔧 Invoice Operations</h3>
+                
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <h4>Update Invoice Status</h4>
+                        <span class="method patch">PATCH</span>
+                    </div>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label>Invoice ID:</label>
+                            <input type="text" id="statusInvoiceId" placeholder="Invoice's MongoDB ObjectId">
+                        </div>
+                        <div class="form-group">
+                            <label>New Status:</label>
+                            <select id="newInvoiceStatus">
+                                <option value="draft">Draft</option>
+                                <option value="pending">Pending</option>
+                                <option value="paid">Paid</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Payment Method (if paid):</label>
+                            <select id="statusPaymentMethod">
+                                <option value="">Select if paid</option>
+                                <option value="cash">Cash</option>
+                                <option value="card">Card</option>
+                                <option value="bank_transfer">Bank Transfer</option>
+                                <option value="online">Online</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="updateInvoiceStatus()">Update Status</button>
+                    <div id="statusResponse" class="response-area" style="display: none;"></div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <h4>Update Invoice</h4>
+                        <span class="method patch">PATCH</span>
+                    </div>
+                    <div class="info-box">
+                        <strong>Note:</strong> Paid invoices can only be updated for payment method, paid date, and notes.
+                    </div>
+                    <div class="form-group">
+                        <label>Invoice ID to Update:</label>
+                        <input type="text" id="updateInvoiceId" placeholder="Invoice's MongoDB ObjectId">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Labor Charges:</label>
+                            <input type="number" id="updateLaborCharges" placeholder="New labor charges" min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Tax Amount:</label>
+                            <input type="number" id="updateTax" placeholder="New tax amount" min="0" step="0.01">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Discount Amount:</label>
+                            <input type="number" id="updateDiscount" placeholder="New discount" min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Notes:</label>
+                            <textarea id="updateNotes" placeholder="Updated notes..."></textarea>
+                        </div>
+                    </div>
+                    <button onclick="updateInvoice()">Update Invoice</button>
+                    <div id="updateResponse" class="response-area" style="display: none;"></div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <h4>Generate Invoice PDF</h4>
+                        <span class="method get">GET</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Invoice ID:</label>
+                        <input type="text" id="pdfInvoiceId" placeholder="Invoice's MongoDB ObjectId">
+                    </div>
+                    <button onclick="generateInvoicePDF()">Generate PDF Data</button>
+                    <div id="pdfResponse" class="response-area" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Admin Operations Section -->
+            <div class="section">
+                <h3>⚙️ Admin Operations</h3>
+                
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <h4>Get Invoice Statistics</h4>
+                        <span class="method get">GET</span>
+                    </div>
+                    <button onclick="getInvoiceStats()">Get Statistics</button>
+                    <div id="statsResponse" class="response-area" style="display: none;"></div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <h4>Delete Invoice</h4>
+                        <span class="method delete">DELETE</span>
+                    </div>
+                    <div class="warning-box">
+                        <strong>Warning:</strong> Paid invoices cannot be deleted. Only draft, pending, or cancelled invoices can be deleted.
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Invoice ID:</label>
+                            <input type="text" id="deleteInvoiceId" placeholder="Invoice's MongoDB ObjectId">
+                        </div>
+                        <div class="form-group">
+                            <label>Permanent Delete:</label>
+                            <select id="permanentDelete">
+                                <option value="false">Soft Delete (Cancel)</option>
+                                <option value="true">Permanent Delete</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="deleteInvoice()" style="background: #dc3545;">Delete Invoice</button>
+                    <div id="deleteResponse" class="response-area" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api/v1';
+        let authToken = localStorage.getItem('authToken');
+        let currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
+        // Update auth status on page load
+        updateAuthStatus();
+
+        function updateAuthStatus() {
+            const authStatus = document.getElementById('authStatus');
+            const userRole = document.getElementById('userRole');
+            
+            if (authToken && currentUser.email) {
+                authStatus.textContent = 'Authenticated ✅';
+                authStatus.style.color = '#28a745';
+                userRole.textContent = currentUser.role || 'Unknown';
+            } else {
+                authStatus.textContent = 'Not Authenticated ❌';
+                authStatus.style.color = '#dc3545';
+                userRole.textContent = '-';
+            }
+        }
+
+        function makeRequest(url, options = {}) {
+            const headers = {
+                'Content-Type': 'application/json',
+                ...options.headers
+            };
+
+            if (authToken) {
+                headers.Authorization = `Bearer ${authToken}`;
+            }
+
+            return fetch(url, {
+                ...options,
+                headers
+            });
+        }
+
+        function displayResponse(elementId, response, isError = false) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = `response-area ${isError ? 'error' : 'success'}`;
+            element.textContent = JSON.stringify(response, null, 2);
+        }
+
+        // Authentication functions
+        async function login() {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+
+            try {
+                const response = await makeRequest(`${API_BASE}/users/login`, {
+                    method: 'POST',
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    authToken = data.token;
+                    currentUser = data.user;
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    updateAuthStatus();
+                    displayResponse('authResponse', data);
+                } else {
+                    displayResponse('authResponse', data, true);
+                }
+            } catch (error) {
+                displayResponse('authResponse', { error: error.message }, true);
+            }
+        }
+
+        function logout() {
+            authToken = null;
+            currentUser = {};
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
+            updateAuthStatus();
+            displayResponse('authResponse', { message: 'Logged out successfully' });
+        }
+
+        async function getProfile() {
+            try {
+                const response = await makeRequest(`${API_BASE}/users/profile`);
+                const data = await response.json();
+                displayResponse('authResponse', data, !response.ok);
+            } catch (error) {
+                displayResponse('authResponse', { error: error.message }, true);
+            }
+        }
+
+        // Invoice item management
+        function addInvoiceItem() {
+            const itemsContainer = document.getElementById('invoiceItems');
+            const itemRow = document.createElement('div');
+            itemRow.className = 'item-row';
+            itemRow.innerHTML = `
+                <button type="button" class="remove-item-btn" onclick="this.parentElement.remove(); calculateInvoiceTotal();">Remove</button>
+                <div class="form-row-4">
+                    <div class="form-group">
+                        <label>Description:</label>
+                        <input type="text" class="item-description" placeholder="Service description" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity:</label>
+                        <input type="number" class="item-quantity" placeholder="1" min="1" required onchange="calculateItemTotal(this)">
+                    </div>
+                    <div class="form-group">
+                        <label>Unit Price:</label>
+                        <input type="number" class="item-price" placeholder="0.00" min="0" step="0.01" required onchange="calculateItemTotal(this)">
+                    </div>
+                    <div class="form-group">
+                        <label>Total:</label>
+                        <input type="number" class="item-total" readonly>
+                    </div>
+                </div>
+            `;
+            itemsContainer.appendChild(itemRow);
+        }
+
+        function calculateItemTotal(element) {
+            const row = element.closest('.item-row');
+            const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
+            const price = parseFloat(row.querySelector('.item-price').value) || 0;
+            const total = quantity * price;
+            row.querySelector('.item-total').value = total.toFixed(2);
+            calculateInvoiceTotal();
+        }
+
+        function calculateInvoiceTotal() {
+            const items = document.querySelectorAll('.item-row');
+            let subtotal = 0;
+
+            // Calculate items subtotal
+            items.forEach(item => {
+                const quantity = parseFloat(item.querySelector('.item-quantity').value) || 0;
+                const price = parseFloat(item.querySelector('.item-price').value) || 0;
+                const total = quantity * price;
+                item.querySelector('.item-total').value = total.toFixed(2);
+                subtotal += total;
+            });
+
+            // Add labor charges
+            const laborCharges = parseFloat(document.getElementById('createLaborCharges').value) || 0;
+            subtotal += laborCharges;
+
+            // Get tax and discount
+            const tax = parseFloat(document.getElementById('createTax').value) || 0;
+            const discount = parseFloat(document.getElementById('createDiscount').value) || 0;
+
+            // Calculate final total
+            const finalTotal = subtotal + tax - discount;
+
+            // Update summary
+            document.getElementById('summarySubtotal').textContent = subtotal.toFixed(2);
+            document.getElementById('summaryTax').textContent = tax.toFixed(2);
+            document.getElementById('summaryDiscount').textContent = discount.toFixed(2);
+            document.getElementById('summaryTotal').textContent = finalTotal.toFixed(2);
+            document.getElementById('invoiceSummary').style.display = 'block';
+        }
+
+        // Invoice API functions
+        async function searchInvoices() {
+            const query = document.getElementById('searchQuery').value;
+            try {
+                const response = await makeRequest(`${API_BASE}/invoices/search?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                displayResponse('searchResponse', data, !response.ok);
+            } catch (error) {
+                displayResponse('searchResponse', { error: error.message }, true);
+            }
+        }
+
+        async function getAllInvoices() {
+            const status = document.getElementById('filterStatus').value;
+            const paymentMethod = document.getElementById('filterPaymentMethod').value;
+            const page = document.getElementById('filterPage').value;
+            const limit = document.getElementById('filterLimit').value;
+            const dateFrom = document.getElementById('filterDateFrom').value;
+            const dateTo = document.getElementById('filterDateTo').value;
+            const minAmount = document.getElementById('filterMinAmount').value;
+            const maxAmount = document.getElementById('filterMaxAmount').value;
+
+            const params = new URLSearchParams();
+            if (status) params.append('status', status);
+            if (paymentMethod) params.append('paymentMethod', paymentMethod);
+            if (page) params.append('page', page);
+            if (limit) params.append('limit', limit);
+            if (dateFrom) params.append('dateFrom', dateFrom);
+            if (dateTo) params.append('dateTo', dateTo);
+            if (minAmount) params.append('minAmount', minAmount);
+            if (maxAmount) params.append('maxAmount', maxAmount);
+
+            try {
+                const response = await makeRequest(`${API_BASE}/invoices?${params.toString()}`);
+                const data = await response.json();
+                displayResponse('getAllResponse', data, !response.ok);
+            } catch (error) {
+                displayResponse('getAllResponse', { error: error.message }, true);
+            }
+        }
+
+        async function getInvoiceByInvoiceId() {
+            const invoiceId = document.getElementById('getByInvoiceId').value;
+            try {
+                const response = await makeRequest(`${API_BASE}/invoices/invoice-id/${encodeURIComponent(invoiceId)}`);
+                const data = await response.json();
+                displayResponse('getByInvoiceIdResponse', data, !response.ok);
+            } catch (error) {
+                displayResponse('getByInvoiceIdResponse', { error: error.message }, true);
+            }
+        }
+
+        async function createInvoice() {
+            const bookingId = document.getElementById('createBookingId').value;
+            const customerId = document.getElementById('createCustomerId').value;
+            const laborCharges = parseFloat(document.getElementById('createLaborCharges').value) || 0;
+            const tax = parseFloat(document.getElementById('createTax').value) || 0;
+            const discount = parseFloat(document.getElementById('createDiscount').value) || 0;
+            const paymentMethod = document.getElementById('createPaymentMethod').value;
+            const notes = document.getElementById('createNotes').value;
+
+            // Collect items
+            const items = [];
+            const itemRows = document.querySelectorAll('.item-row');
+            itemRows.forEach(row => {
+                const description = row.querySelector('.item-description').value;
+                const quantity = parseFloat(row.querySelector('.item-quantity').value);
+                const unitPrice = parseFloat(row.querySelector('.item-price').value);
+
+                if (description && quantity && unitPrice) {
+                    items.push({ description, quantity, unitPrice });
+                }
+            });
+
+            if (items.length === 0) {
+                alert('Please add at least one item to the invoice');
+                return;
+            }
+
+            const invoiceData = {
+                booking: bookingId,
+                customer: customerId,
+                items,
+                laborCharges,
+                tax,
+                discount,
+                paymentMethod,
+                notes
+            };
+
+            try {
+                const response = await makeRequest(`${API_BASE}/invoices`, {
+                    method: 'POST',
+                    body: JSON.stringify(invoiceData)
+                });
+                const data = await response.json();
+                displayResponse('createResponse', data, !response.ok);
+            } catch (error) {
+                displayResponse('createResponse', { error: error.message }, true);
+            }
+        }
+
+        async function getInvoiceById() {
+            const invoiceId = document.getElementById('getByIdInvoiceId').value;
+            try {
+                const response = await makeRequest(`${API_BASE}/invoices/${invoiceId}`);
+                const data = await response.json();
+                displayResponse('getByIdResponse', data, !response.ok);
+            } catch (error) {
+                displayResponse('getByIdResponse', { error: error.message }, true);
+            }
+        }
+
+        async function getInvoicesByCustomer() {
+            const customerId = document.getElementById('customerInvoicesId').value;
+            const status = document.getElementById('customerInvoicesStatus').value;
+
+            let url = `${API_BASE}/invoices/customer/${customerId}`;
+            if (status) {
+                url += `?status=${status}`;
+            }
+
+            try {
+                const response = await makeRequest(url);
+                const data = await response.json();
+                displayResponse('customerInvoicesResponse', data, !response.ok);
+            } catch (error) {
+                displayResponse('customerInvoicesResponse', { error: error.message }, true);
+            }
+        }
+
+        async function updateInvoiceStatus() {
+            const invoiceId = document.getElementById('statusInvoiceId').value;
+            const status = document.getElementById('newInvoiceStatus').value;
+            const paymentMethod = document.getElementById('statusPaymentMethod').value;
+
+            const updateData = { status };
+            if (status === 'paid' && paymentMethod) {
+                updateData.paymentMethod = paymentMethod;
+            }
+
+            try {
+                const response = await makeRequest(`${API_BASE}/invoices/${invoiceId}/status`, {
+                    method: 'PATCH',
+                    body: JSON.stringify(updateData)
+                });
+                const data = await response.json();
+                displayResponse('statusResponse', data, !response.ok);
+            } catch (error) {
+                displayResponse('statusResponse', { error: error.message }, true);
+            }
+        }
+
+        async function updateInvoice() {
+            const invoiceId = document.getElementById('updateInvoiceId').value;
+            const updateData = {};
+
+            const laborCharges = document.getElementById('updateLaborCharges').value;
+            const tax = document.getElementById('updateTax').value;
+            const discount = document.getElementById('updateDiscount').value;
+            const notes = document.getElementById('updateNotes').value;
+
+            if (laborCharges) updateData.laborCharges = parseFloat(laborCharges);
+            if (tax) updateData.tax = parseFloat(tax);
+            if (discount) updateData.discount = parseFloat(discount);
+            if (notes) updateData.notes = notes;
+
+            try {
+                const response = await makeRequest(`${API_BASE}/invoices/${invoiceId}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify(updateData)
+                });
+                const data = await response.json();
+                displayResponse('updateResponse', data, !response.ok);
+            } catch (error) {
+                displayResponse('updateResponse', { error: error.message }, true);
+            }
+        }
+
+        async function generateInvoicePDF() {
+            const invoiceId = document.getElementById('pdfInvoiceId').value;
+            try {
+                const response = await makeRequest(`${API_BASE}/invoices/${invoiceId}/pdf`);
+                const data = await response.json();
+                displayResponse('pdfResponse', data, !response.ok);
+            } catch (error) {
+                displayResponse('pdfResponse', { error: error.message }, true);
+            }
+        }
+
+        async function getInvoiceStats() {
+            try {
+                const response = await makeRequest(`${API_BASE}/invoices/stats/overview`);
+                const data = await response.json();
+                displayResponse('statsResponse', data, !response.ok);
+            } catch (error) {
+                displayResponse('statsResponse', { error: error.message }, true);
+            }
+        }
+
+        async function deleteInvoice() {
+            const invoiceId = document.getElementById('deleteInvoiceId').value;
+            const permanent = document.getElementById('permanentDelete').value;
+
+            try {
+                const response = await makeRequest(`${API_BASE}/invoices/${invoiceId}?permanent=${permanent}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                displayResponse('deleteResponse', data, !response.ok);
+            } catch (error) {
+                displayResponse('deleteResponse', { error: error.message }, true);
+            }
+        }
+
+        // Quick action functions
+        function quickSearch() {
+            document.getElementById('searchQuery').value = 'INV';
+            searchInvoices();
+        }
+
+        function fillSampleInvoice() {
+            // Fill sample data
+            document.getElementById('createLaborCharges').value = '50.00';
+            document.getElementById('createTax').value = '8.50';
+            document.getElementById('createDiscount').value = '5.00';
+            document.getElementById('createPaymentMethod').value = 'cash';
+            document.getElementById('createNotes').value = 'Sample invoice for testing';
+
+            // Fill first item
+            const firstItem = document.querySelector('.item-row');
+            firstItem.querySelector('.item-description').value = 'Oil Change Service';
+            firstItem.querySelector('.item-quantity').value = '1';
+            firstItem.querySelector('.item-price').value = '25.00';
+            calculateItemTotal(firstItem.querySelector('.item-quantity'));
+
+            alert('Sample invoice data filled! Please add valid Booking ID and Customer ID, then click Create Invoice.');
+        }
+
+        function clearAllResponses() {
+            const responses = document.querySelectorAll('.response-area');
+            responses.forEach(response => {
+                response.style.display = 'none';
+                response.textContent = '';
+            });
+        }
+
+        // Add event listeners for real-time calculation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add change listeners to all quantity and price inputs
+            document.addEventListener('change', function(e) {
+                if (e.target.classList.contains('item-quantity') || e.target.classList.contains('item-price')) {
+                    calculateItemTotal(e.target);
+                }
+            });
+
+            // Add change listeners to labor, tax, discount inputs
+            ['createLaborCharges', 'createTax', 'createDiscount'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('change', calculateInvoiceTotal);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
