@@ -45,7 +45,7 @@ const registerUser = asyncWrapper(async (req, res, next) => {
     return next(createCustomError("Customer details are required for customer role", 400));
   }
 
-  if (["technician", "service_advisor", "manager"].includes(role) && !req.body.employeeDetails) {
+  if (["technician", "service_advisor", "manager", "cashier"].includes(role) && !req.body.employeeDetails) {
     return next(createCustomError("Employee details are required for staff roles", 400));
   }
 

@@ -34,7 +34,7 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: [true, "User role is required"],
       enum: {
-        values: ["customer", "technician", "service_advisor", "manager", "admin"],
+        values: ["customer", "technician", "service_advisor", "manager", "admin", "cashier"],
         message: "Invalid user role",
       },
     },
@@ -165,21 +165,21 @@ const UserSchema = new mongoose.Schema(
         },
       },
     },
-    // Employee details (technician, service_advisor, manager)
+    // Employee details (technician, service_advisor, manager, cashier)
     employeeDetails: {
       employeeId: {
         type: String,
         trim: true,
         uppercase: true,
         required: function () {
-          return ["technician", "service_advisor", "manager"].includes(this.role);
+          return ["technician", "service_advisor", "manager", "cashier"].includes(this.role);
         },
       },
       department: {
         type: String,
-        enum: ["mechanical", "electrical", "bodywork", "detailing", "customer_service", "management"],
+        enum: ["mechanical", "electrical", "bodywork", "detailing", "customer_service", "management", "front_desk"],
         required: function () {
-          return ["technician", "service_advisor", "manager"].includes(this.role);
+          return ["technician", "service_advisor", "manager", "cashier"].includes(this.role);
         },
       },
       specializations: [{
@@ -224,7 +224,7 @@ const UserSchema = new mongoose.Schema(
       joinDate: {
         type: Date,
         required: function () {
-          return ["technician", "service_advisor", "manager"].includes(this.role);
+          return ["technician", "service_advisor", "manager", "cashier"].includes(this.role);
         },
         validate: {
           validator: function (v) {
@@ -237,7 +237,7 @@ const UserSchema = new mongoose.Schema(
         type: Number,
         min: [0, "Salary cannot be negative"],
         required: function () {
-          return ["technician", "service_advisor", "manager"].includes(this.role);
+          return ["technician", "service_advisor", "manager", "cashier"].includes(this.role);
         },
       },
       commissionRate: {
@@ -348,6 +348,7 @@ UserSchema.pre("save", async function (next) {
         service_advisor: "SA",
         manager: "M",
         admin: "A",
+        cashier: "CS",
       };
 
       const prefix = rolePrefix[this.role];
@@ -398,7 +399,7 @@ UserSchema.pre("save", async function (next) {
   }
 
   // Generate employee ID for staff members
-  if (["technician", "service_advisor", "manager"].includes(this.role) && 
+  if (["technician", "service_advisor", "manager", "cashier"].includes(this.role) && 
       this.employeeDetails && !this.employeeDetails.employeeId) {
     const deptPrefix = {
       mechanical: "MEC",
@@ -406,7 +407,8 @@ UserSchema.pre("save", async function (next) {
       bodywork: "BOD",
       detailing: "DET",
       customer_service: "CS",
-      management: "MGT"
+      management: "MGT",
+      front_desk: "FD"
     };
     
     const prefix = deptPrefix[this.employeeDetails.department];

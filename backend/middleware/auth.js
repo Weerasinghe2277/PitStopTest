@@ -134,13 +134,13 @@ export const requireCustomer = (req, res, next) => {
   next();
 };
 
-// Check if user is an employee (technician, service_advisor, manager)
+// Check if user is an employee (technician, service_advisor, manager, cashier)
 export const requireEmployee = (req, res, next) => {
   if (!req.user) {
     return next(createCustomError("Authentication required", 401));
   }
 
-  const employeeRoles = ["technician", "service_advisor", "manager"];
+  const employeeRoles = ["technician", "service_advisor", "manager", "cashier"];
   if (!employeeRoles.includes(req.user.role)) {
     return next(createCustomError("This resource is only available to employees", 403));
   }
@@ -169,6 +169,19 @@ export const requireServiceAdvisor = (req, res, next) => {
 
   if (req.user.role !== "service_advisor") {
     return next(createCustomError("This resource is only available to service advisors", 403));
+  }
+
+  next();
+};
+
+// Check if user is a cashier
+export const requireCashier = (req, res, next) => {
+  if (!req.user) {
+    return next(createCustomError("Authentication required", 401));
+  }
+
+  if (req.user.role !== "cashier") {
+    return next(createCustomError("This resource is only available to cashiers", 403));
   }
 
   next();
@@ -234,7 +247,7 @@ export const requireDepartment = (...departments) => {
       return next(createCustomError("Authentication required", 401));
     }
 
-    const employeeRoles = ["technician", "service_advisor", "manager"];
+    const employeeRoles = ["technician", "service_advisor", "manager", "cashier"];
     if (!employeeRoles.includes(req.user.role)) {
       return next(createCustomError("This resource is only available to employees", 403));
     }
@@ -282,6 +295,7 @@ export default {
   requireEmployee,
   requireTechnician,
   requireServiceAdvisor,
+  requireCashier,
   loginRateLimit,
   requireTwoFactor,
   requireSpecialization,
