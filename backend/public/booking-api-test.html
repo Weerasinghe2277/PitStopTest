@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Management API Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .auth-status {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .auth-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #dc3545;
+        }
+
+        .status-indicator.authenticated {
+            background: #28a745;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #3498db;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .endpoint {
+            background: white;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .endpoint-title {
+            flex: 1;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .method {
+            padding: 5px 12px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+
+        .method.get { background: #28a745; }
+        .method.post { background: #007bff; }
+        .method.patch { background: #ffc107; color: #000; }
+        .method.delete { background: #dc3545; }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+            font-family: monospace;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .response {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+            display: none;
+        }
+
+        .response.show {
+            display: block;
+        }
+
+        .response.error {
+            border-left-color: #e74c3c;
+            background: #fdf2f2;
+        }
+
+        .response.success {
+            border-left-color: #27ae60;
+            background: #f2fdf7;
+        }
+
+        .response pre {
+            background: rgba(0,0,0,0.05);
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .col {
+            flex: 1;
+        }
+
+        .quick-actions {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            color: white;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 10px;
+        }
+
+        .quick-actions h3 {
+            margin-bottom: 15px;
+        }
+
+        .quick-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .quick-btn {
+            padding: 8px 15px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quick-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .workflow-status {
+            background: linear-gradient(45deg, #8e44ad, #3498db);
+            color: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .status-flow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .status-step {
+            padding: 5px 10px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📅 Booking Management API Test</h1>
+            <p>Test all booking management endpoints following the PitStop workflow</p>
+            
+            <div class="auth-status">
+                <div class="auth-info">
+                    <div class="status-indicator" id="authIndicator"></div>
+                    <span id="authStatus">Not Authenticated</span>
+                    <span id="userInfo"></span>
+                </div>
+                <div>
+                    <input type="text" id="tokenInput" placeholder="Enter JWT Token" style="padding: 8px; margin-right: 10px; border-radius: 5px; border: none;">
+                    <button class="btn btn-primary" onclick="setToken()">Set Token</button>
+                    <button class="btn btn-danger" onclick="clearToken()">Clear</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Workflow Status -->
+            <div class="workflow-status">
+                <h4>📋 PitStop Booking Workflow</h4>
+                <div class="status-flow">
+                    <span class="status-step">1. Pending</span>
+                    <span class="status-step">2. Inspecting</span>
+                    <span class="status-step">3. Working</span>
+                    <span class="status-step">4. Completed</span>
+                </div>
+                <small>Cashier creates → Inspector assigns → Labourers work → Inspector completes</small>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <h3>🚀 Quick Actions</h3>
+                <div class="quick-buttons">
+                    <button class="quick-btn" onclick="getAllBookings()">View All Bookings</button>
+                    <button class="quick-btn" onclick="getStats()">View Statistics</button>
+                    <button class="quick-btn" onclick="getTodayBookings()">Today's Bookings</button>
+                    <button class="quick-btn" onclick="searchSample()">Sample Search</button>
+                    <button class="quick-btn" onclick="createSampleBooking()">Create Sample Booking</button>
+                </div>
+            </div>
+
+            <!-- CRUD Operations -->
+            <div class="section">
+                <h2>📝 CRUD Operations</h2>
+
+                <!-- Create Booking -->
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method post">POST</span>
+                        <span class="endpoint-title">Create New Booking (Cashier Role)</span>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Customer ID</label>
+                                <input type="text" class="form-control" id="createCustomer" placeholder="MongoDB ObjectId">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Vehicle ID</label>
+                                <input type="text" class="form-control" id="createVehicle" placeholder="MongoDB ObjectId">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Service Type</label>
+                                <select class="form-control" id="createServiceType">
+                                    <option value="inspection">Inspection</option>
+                                    <option value="repair">Repair</option>
+                                    <option value="maintenance">Maintenance</option>
+                                    <option value="bodywork">Bodywork</option>
+                                    <option value="detailing">Detailing</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Priority</label>
+                                <select class="form-control" id="createPriority">
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Scheduled Date</label>
+                                <input type="date" class="form-control" id="createDate">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Time Slot</label>
+                                <select class="form-control" id="createTimeSlot">
+                                    <option value="09:00-11:00">09:00-11:00</option>
+                                    <option value="11:00-13:00">11:00-13:00</option>
+                                    <option value="13:00-15:00">13:00-15:00</option>
+                                    <option value="15:00-17:00">15:00-17:00</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="form-control" id="createDescription" placeholder="Service description..."></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="createBooking()">Create Booking</button>
+                    <div class="response" id="createResponse"></div>
+                </div>
+
+                <!-- Get All Bookings -->
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-title">Get All Bookings with Filters</span>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Status Filter</label>
+                                <select class="form-control" id="getAllStatus">
+                                    <option value="">All Status</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="inspecting">Inspecting</option>
+                                    <option value="working">Working</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Service Type Filter</label>
+                                <select class="form-control" id="getAllServiceType">
+                                    <option value="">All Services</option>
+                                    <option value="inspection">Inspection</option>
+                                    <option value="repair">Repair</option>
+                                    <option value="maintenance">Maintenance</option>
+                                    <option value="bodywork">Bodywork</option>
+                                    <option value="detailing">Detailing</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Page</label>
+                                <input type="number" class="form-control" id="getAllPage" value="1" min="1">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Limit</label>
+                                <input type="number" class="form-control" id="getAllLimit" value="10" min="1" max="100">
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="getAllBookings()">Get Bookings</button>
+                    <div class="response" id="getAllResponse"></div>
+                </div>
+
+                <!-- Get Booking by ID -->
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-title">Get Booking by ID</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Booking ID</label>
+                        <input type="text" class="form-control" id="getBookingId" placeholder="MongoDB ObjectId or BookingId (BK00001)">
+                    </div>
+                    <button class="btn btn-primary" onclick="getBookingById()">Get Booking</button>
+                    <div class="response" id="getBookingResponse"></div>
+                </div>
+
+                <!-- Update Booking -->
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method patch">PATCH</span>
+                        <span class="endpoint-title">Update Booking</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Booking ID to Update</label>
+                        <input type="text" class="form-control" id="updateBookingId" placeholder="MongoDB ObjectId">
+                    </div>
+                    <div class="form-group">
+                        <label>Update Data (JSON)</label>
+                        <textarea class="form-control" id="updateData" placeholder='{"priority": "high", "estimatedCost": 250.00}'></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="updateBooking()">Update Booking</button>
+                    <div class="response" id="updateResponse"></div>
+                </div>
+            </div>
+
+            <!-- Workflow Operations -->
+            <div class="section">
+                <h2>⚙️ Workflow Operations</h2>
+
+                <!-- Assign Inspector -->
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method patch">PATCH</span>
+                        <span class="endpoint-title">Assign Inspector (Cashier → Inspector)</span>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Booking ID</label>
+                                <input type="text" class="form-control" id="assignBookingId" placeholder="MongoDB ObjectId">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Inspector ID</label>
+                                <input type="text" class="form-control" id="inspectorId" placeholder="Inspector MongoDB ObjectId">
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="assignInspector()">Assign Inspector</button>
+                    <div class="response" id="assignResponse"></div>
+                </div>
+
+                <!-- Update Status -->
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method patch">PATCH</span>
+                        <span class="endpoint-title">Update Booking Status</span>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Booking ID</label>
+                                <input type="text" class="form-control" id="statusBookingId" placeholder="MongoDB ObjectId">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>New Status</label>
+                                <select class="form-control" id="newStatus">
+                                    <option value="pending">Pending</option>
+                                    <option value="inspecting">Inspecting</option>
+                                    <option value="working">Working</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Notes (Optional)</label>
+                        <textarea class="form-control" id="statusNotes" placeholder="Status change notes..."></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="updateStatus()">Update Status</button>
+                    <div class="response" id="statusResponse"></div>
+                </div>
+
+                <!-- Add Note -->
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method post">POST</span>
+                        <span class="endpoint-title">Add Note to Booking</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Booking ID</label>
+                        <input type="text" class="form-control" id="noteBookingId" placeholder="MongoDB ObjectId">
+                    </div>
+                    <div class="form-group">
+                        <label>Note</label>
+                        <textarea class="form-control" id="noteContent" placeholder="Add your note here..."></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="addNote()">Add Note</button>
+                    <div class="response" id="noteResponse"></div>
+                </div>
+
+                <!-- Cancel Booking -->
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method patch">PATCH</span>
+                        <span class="endpoint-title">Cancel Booking</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Booking ID</label>
+                        <input type="text" class="form-control" id="cancelBookingId" placeholder="MongoDB ObjectId">
+                    </div>
+                    <div class="form-group">
+                        <label>Cancellation Reason</label>
+                        <textarea class="form-control" id="cancelReason" placeholder="Reason for cancellation..."></textarea>
+                    </div>
+                    <button class="btn btn-danger" onclick="cancelBooking()">Cancel Booking</button>
+                    <div class="response" id="cancelResponse"></div>
+                </div>
+            </div>
+
+            <!-- Search & Reports -->
+            <div class="section">
+                <h2>📊 Search & Reports</h2>
+
+                <!-- Search Bookings -->
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-title">Search Bookings</span>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Search Query</label>
+                                <input type="text" class="form-control" id="searchQuery" placeholder="e.g., BK00001, repair, maintenance">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Status Filter</label>
+                                <select class="form-control" id="searchStatus">
+                                    <option value="">All Status</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="inspecting">Inspecting</option>
+                                    <option value="working">Working</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="searchBookings()">Search</button>
+                    <div class="response" id="searchResponse"></div>
+                </div>
+
+                <!-- Booking Statistics -->
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-title">Get Booking Statistics</span>
+                    </div>
+                    <button class="btn btn-primary" onclick="getStats()">Get Statistics</button>
+                    <div class="response" id="statsResponse"></div>
+                </div>
+
+                <!-- Customer Bookings -->
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-title">Get Customer Bookings</span>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Customer ID</label>
+                                <input type="text" class="form-control" id="customerBookingId" placeholder="Customer MongoDB ObjectId">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Status Filter</label>
+                                <select class="form-control" id="customerStatus">
+                                    <option value="">All Status</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="getCustomerBookings()">Get Customer Bookings</button>
+                    <div class="response" id="customerResponse"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api/v1/bookings';
+        let authToken = localStorage.getItem('authToken') || '';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            if (authToken) {
+                document.getElementById('tokenInput').value = authToken;
+                updateAuthStatus();
+            }
+            // Set default date to tomorrow
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('createDate').value = tomorrow.toISOString().split('T')[0];
+        });
+
+        // Token management
+        function setToken() {
+            const token = document.getElementById('tokenInput').value.trim();
+            if (token) {
+                authToken = token;
+                localStorage.setItem('authToken', token);
+                updateAuthStatus();
+            }
+        }
+
+        function clearToken() {
+            authToken = '';
+            localStorage.removeItem('authToken');
+            document.getElementById('tokenInput').value = '';
+            updateAuthStatus();
+        }
+
+        function updateAuthStatus() {
+            const indicator = document.getElementById('authIndicator');
+            const status = document.getElementById('authStatus');
+            const userInfo = document.getElementById('userInfo');
+
+            if (authToken) {
+                indicator.classList.add('authenticated');
+                status.textContent = 'Authenticated';
+                userInfo.textContent = '(Token set)';
+            } else {
+                indicator.classList.remove('authenticated');
+                status.textContent = 'Not Authenticated';
+                userInfo.textContent = '';
+            }
+        }
+
+        // API helper
+        async function makeRequest(endpoint, method = 'GET', data = null) {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+
+            if (authToken) {
+                headers.Authorization = `Bearer ${authToken}`;
+            }
+
+            const config = {
+                method,
+                headers
+            };
+
+            if (data) {
+                config.body = JSON.stringify(data);
+            }
+
+            try {
+                const response = await fetch(endpoint, config);
+                const result = await response.json();
+                
+                return {
+                    status: response.status,
+                    data: result,
+                    success: response.ok
+                };
+            } catch (error) {
+                return {
+                    status: 0,
+                    data: { error: error.message },
+                    success: false
+                };
+            }
+        }
+
+        function showResponse(elementId, response) {
+            const element = document.getElementById(elementId);
+            element.classList.remove('success', 'error');
+            element.classList.add(response.success ? 'success' : 'error');
+            element.classList.add('show');
+            
+            element.innerHTML = `
+                <strong>Status:</strong> ${response.status}<br>
+                <strong>Response:</strong>
+                <pre>${JSON.stringify(response.data, null, 2)}</pre>
+            `;
+        }
+
+        // CRUD Operations
+        async function createBooking() {
+            const data = {
+                customer: document.getElementById('createCustomer').value,
+                vehicle: document.getElementById('createVehicle').value,
+                serviceType: document.getElementById('createServiceType').value,
+                priority: document.getElementById('createPriority').value,
+                scheduledDate: document.getElementById('createDate').value,
+                timeSlot: document.getElementById('createTimeSlot').value,
+                description: document.getElementById('createDescription').value
+            };
+
+            const response = await makeRequest(API_BASE, 'POST', data);
+            showResponse('createResponse', response);
+        }
+
+        async function getAllBookings() {
+            const status = document.getElementById('getAllStatus').value;
+            const serviceType = document.getElementById('getAllServiceType').value;
+            const page = document.getElementById('getAllPage').value;
+            const limit = document.getElementById('getAllLimit').value;
+
+            const params = new URLSearchParams();
+            if (status) params.append('status', status);
+            if (serviceType) params.append('serviceType', serviceType);
+            if (page) params.append('page', page);
+            if (limit) params.append('limit', limit);
+
+            const response = await makeRequest(`${API_BASE}?${params}`);
+            showResponse('getAllResponse', response);
+        }
+
+        async function getBookingById() {
+            const bookingId = document.getElementById('getBookingId').value.trim();
+            if (!bookingId) return;
+
+            // Check if it's a custom bookingId (starts with BK) or MongoDB ObjectId
+            const endpoint = bookingId.startsWith('BK') ? 
+                `${API_BASE}/booking-id/${bookingId}` : 
+                `${API_BASE}/${bookingId}`;
+
+            const response = await makeRequest(endpoint);
+            showResponse('getBookingResponse', response);
+        }
+
+        async function updateBooking() {
+            const bookingId = document.getElementById('updateBookingId').value.trim();
+            const dataStr = document.getElementById('updateData').value.trim();
+
+            if (!bookingId || !dataStr) return;
+
+            try {
+                const data = JSON.parse(dataStr);
+                const response = await makeRequest(`${API_BASE}/${bookingId}`, 'PATCH', data);
+                showResponse('updateResponse', response);
+            } catch (error) {
+                showResponse('updateResponse', {
+                    status: 0,
+                    data: { error: 'Invalid JSON data' },
+                    success: false
+                });
+            }
+        }
+
+        // Workflow Operations
+        async function assignInspector() {
+            const bookingId = document.getElementById('assignBookingId').value.trim();
+            const inspectorId = document.getElementById('inspectorId').value.trim();
+
+            if (!bookingId || !inspectorId) return;
+
+            const data = { inspectorId };
+            const response = await makeRequest(`${API_BASE}/${bookingId}/assign-inspector`, 'PATCH', data);
+            showResponse('assignResponse', response);
+        }
+
+        async function updateStatus() {
+            const bookingId = document.getElementById('statusBookingId').value.trim();
+            const status = document.getElementById('newStatus').value;
+            const notes = document.getElementById('statusNotes').value;
+
+            if (!bookingId || !status) return;
+
+            const data = { status, notes };
+            const response = await makeRequest(`${API_BASE}/${bookingId}/status`, 'PATCH', data);
+            showResponse('statusResponse', response);
+        }
+
+        async function addNote() {
+            const bookingId = document.getElementById('noteBookingId').value.trim();
+            const note = document.getElementById('noteContent').value.trim();
+
+            if (!bookingId || !note) return;
+
+            const data = { note };
+            const response = await makeRequest(`${API_BASE}/${bookingId}/notes`, 'POST', data);
+            showResponse('noteResponse', response);
+        }
+
+        async function cancelBooking() {
+            const bookingId = document.getElementById('cancelBookingId').value.trim();
+            const reason = document.getElementById('cancelReason').value.trim();
+
+            if (!bookingId) return;
+
+            const data = { reason };
+            const response = await makeRequest(`${API_BASE}/${bookingId}/cancel`, 'PATCH', data);
+            showResponse('cancelResponse', response);
+        }
+
+        // Search & Reports
+        async function searchBookings() {
+            const query = document.getElementById('searchQuery').value.trim();
+            const status = document.getElementById('searchStatus').value;
+
+            if (!query) return;
+
+            const params = new URLSearchParams({ q: query });
+            if (status) params.append('status', status);
+
+            const response = await makeRequest(`${API_BASE}/search?${params}`);
+            showResponse('searchResponse', response);
+        }
+
+        async function getStats() {
+            const response = await makeRequest(`${API_BASE}/stats`);
+            showResponse('statsResponse', response);
+        }
+
+        async function getCustomerBookings() {
+            const customerId = document.getElementById('customerBookingId').value.trim();
+            const status = document.getElementById('customerStatus').value;
+
+            if (!customerId) return;
+
+            const params = new URLSearchParams();
+            if (status) params.append('status', status);
+
+            const response = await makeRequest(`${API_BASE}/customer/${customerId}?${params}`);
+            showResponse('customerResponse', response);
+        }
+
+        // Quick Actions
+        function getTodayBookings() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('getAllStatus').value = '';
+            const params = new URLSearchParams({ dateFrom: today, dateTo: today });
+            makeRequest(`${API_BASE}?${params}`).then(response => 
+                showResponse('getAllResponse', response)
+            );
+        }
+
+        function searchSample() {
+            document.getElementById('searchQuery').value = 'repair';
+            searchBookings();
+        }
+
+        function createSampleBooking() {
+            // You'll need to replace these with actual IDs from your database
+            document.getElementById('createCustomer').value = '60d21b4667d0d8992e610c85'; // Sample customer ID
+            document.getElementById('createVehicle').value = '60d21b4667d0d8992e610c86'; // Sample vehicle ID
+            document.getElementById('createServiceType').value = 'maintenance';
+            document.getElementById('createPriority').value = 'medium';
+            document.getElementById('createDescription').value = 'Regular maintenance service including oil change and brake inspection';
+        }
+    </script>
+</body>
+</html>

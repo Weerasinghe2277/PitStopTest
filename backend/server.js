@@ -8,6 +8,7 @@ import users from "./routes/users.js";
 import inventory from "./routes/inventory.js";
 import vehicles from "./routes/vehicles.js";
 import invoices from "./routes/invoices.js";
+import bookings from "./routes/bookings.js";
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.use("/api/v1/users", users);
 app.use("/api/v1/inventory", inventory);
 app.use("/api/v1/vehicles", vehicles);
 app.use("/api/v1/invoices", invoices);
+app.use("/api/v1/bookings", bookings);
 
 app.use(notFound);
 app.use(errorHandlerMiddleware);

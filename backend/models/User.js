@@ -171,9 +171,7 @@ const UserSchema = new mongoose.Schema(
         type: String,
         trim: true,
         uppercase: true,
-        required: function () {
-          return ["technician", "service_advisor", "manager", "cashier"].includes(this.role);
-        },
+        // Auto-generated in pre-save middleware, not required in schema
       },
       department: {
         type: String,
@@ -399,25 +397,32 @@ UserSchema.pre("save", async function (next) {
   }
 
   // Generate employee ID for staff members
-  if (["technician", "service_advisor", "manager", "cashier"].includes(this.role) && 
-      this.employeeDetails && !this.employeeDetails.employeeId) {
-    const deptPrefix = {
-      mechanical: "MEC",
-      electrical: "ELE",
-      bodywork: "BOD",
-      detailing: "DET",
-      customer_service: "CS",
-      management: "MGT",
-      front_desk: "FD"
-    };
+  if (["technician", "service_advisor", "manager", "cashier"].includes(this.role)) {
+    // Ensure employeeDetails object exists
+    if (!this.employeeDetails) {
+      this.employeeDetails = {};
+    }
     
-    const prefix = deptPrefix[this.employeeDetails.department];
-    if (prefix) {
-      const count = await this.constructor.countDocuments({
-        role: this.role,
-        "employeeDetails.department": this.employeeDetails.department
-      });
-      this.employeeDetails.employeeId = `${prefix}${(count + 1).toString().padStart(3, "0")}`;
+    // Generate employeeId if not provided
+    if (!this.employeeDetails.employeeId && this.employeeDetails.department) {
+      const deptPrefix = {
+        mechanical: "MEC",
+        electrical: "ELE",
+        bodywork: "BOD",
+        detailing: "DET",
+        customer_service: "CS",
+        management: "MGT",
+        front_desk: "FD"
+      };
+      
+      const prefix = deptPrefix[this.employeeDetails.department];
+      if (prefix) {
+        const count = await this.constructor.countDocuments({
+          role: this.role,
+          "employeeDetails.department": this.employeeDetails.department
+        });
+        this.employeeDetails.employeeId = `${prefix}${(count + 1).toString().padStart(3, "0")}`;
+      }
     }
   }
 
