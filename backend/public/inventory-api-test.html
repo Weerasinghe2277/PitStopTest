@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management API Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .auth-status {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .auth-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #dc3545;
+        }
+
+        .status-indicator.authenticated {
+            background: #28a745;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #3498db;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .endpoint {
+            background: white;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .endpoint-title {
+            flex: 1;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .method {
+            padding: 5px 12px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+
+        .method.get { background: #28a745; }
+        .method.post { background: #007bff; }
+        .method.patch { background: #ffc107; color: #000; }
+        .method.delete { background: #dc3545; }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+            font-family: monospace;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .response {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+            display: none;
+        }
+
+        .response.show {
+            display: block;
+        }
+
+        .response.error {
+            border-left-color: #e74c3c;
+            background: #fdf2f2;
+        }
+
+        .response.success {
+            border-left-color: #27ae60;
+            background: #f2fdf7;
+        }
+
+        .response pre {
+            background: rgba(0,0,0,0.05);
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .col {
+            flex: 1;
+        }
+
+        .quick-actions {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            color: white;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 10px;
+        }
+
+        .quick-actions h3 {
+            margin-bottom: 15px;
+        }
+
+        .quick-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .quick-btn {
+            padding: 8px 15px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quick-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏪 Inventory Management API Test</h1>
+            <p>Test all inventory management endpoints</p>
+            
+            <div class="auth-status">
+                <div class="auth-info">
+                    <div class="status-indicator" id="authIndicator"></div>
+                    <span id="authStatus">Not Authenticated</span>
+                    <span id="userInfo"></span>
+                </div>
+                <div>
+                    <input type="text" id="tokenInput" placeholder="Enter JWT Token" style="padding: 8px; margin-right: 10px; border-radius: 5px; border: none;">
+                    <button class="btn btn-primary" onclick="setToken()">Set Token</button>
+                    <button class="btn btn-danger" onclick="clearToken()">Clear</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <h3>🚀 Quick Actions</h3>
+                <div class="quick-buttons">
+                    <button class="quick-btn" onclick="getAllItems()">Get All Items</button>
+                    <button class="quick-btn" onclick="getStats()">View Statistics</button>
+                    <button class="quick-btn" onclick="getLowStock()">Check Low Stock</button>
+                    <button class="quick-btn" onclick="searchSample()">Sample Search</button>
+                    <button class="quick-btn" onclick="createSampleItem()">Create Sample Item</button>
+                </div>
+            </div>
+
+            <!-- CRUD Operations -->
+            <div class="section">
+                <h2>📦 CRUD Operations</h2>
+
+                <!-- Create Item -->
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method post">POST</span>
+                        <span class="endpoint-title">Create Inventory Item</span>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Item Name</label>
+                                <input type="text" class="form-control" id="createName" placeholder="e.g., Brake Pads">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select class="form-control" id="createCategory">
+                                    <option value="parts">Parts</option>
+                                    <option value="tools">Tools</option>
+                                    <option value="fluids">Fluids</option>
+                                    <option value="consumables">Consumables</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Unit Price</label>
+                                <input type="number" class="form-control" id="createPrice" placeholder="0.00" step="0.01">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Unit</label>
+                                <select class="form-control" id="createUnit">
+                                    <option value="piece">Piece</option>
+                                    <option value="liter">Liter</option>
+                                    <option value="kg">Kg</option>
+                                    <option value="meter">Meter</option>
+                                    <option value="set">Set</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="form-control" id="createDescription" placeholder="Item description..."></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Current Stock</label>
+                                <input type="number" class="form-control" id="createStock" placeholder="0" min="0">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Minimum Stock</label>
+                                <input type="number" class="form-control" id="createMinStock" placeholder="0" min="0">
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="createItem()">Create Item</button>
+                    <div class="response" id="createResponse"></div>
+                </div>
+
+                <!-- Get All Items -->
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-title">Get All Inventory Items</span>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Category Filter</label>
+                                <select class="form-control" id="getAllCategory">
+                                    <option value="">All Categories</option>
+                                    <option value="parts">Parts</option>
+                                    <option value="tools">Tools</option>
+                                    <option value="fluids">Fluids</option>
+                                    <option value="consumables">Consumables</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Status Filter</label>
+                                <select class="form-control" id="getAllStatus">
+                                    <option value="">All Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                    <option value="discontinued">Discontinued</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Page</label>
+                                <input type="number" class="form-control" id="getAllPage" value="1" min="1">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Limit</label>
+                                <input type="number" class="form-control" id="getAllLimit" value="10" min="1" max="100">
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="getAllItems()">Get Items</button>
+                    <div class="response" id="getAllResponse"></div>
+                </div>
+
+                <!-- Get Item by ID -->
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-title">Get Item by ID</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Item ID</label>
+                        <input type="text" class="form-control" id="getItemId" placeholder="MongoDB ObjectId or ItemId (ITM00001)">
+                    </div>
+                    <button class="btn btn-primary" onclick="getItemById()">Get Item</button>
+                    <div class="response" id="getItemResponse"></div>
+                </div>
+
+                <!-- Update Item -->
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method patch">PATCH</span>
+                        <span class="endpoint-title">Update Inventory Item</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Item ID to Update</label>
+                        <input type="text" class="form-control" id="updateItemId" placeholder="MongoDB ObjectId">
+                    </div>
+                    <div class="form-group">
+                        <label>Update Data (JSON)</label>
+                        <textarea class="form-control" id="updateData" placeholder='{"name": "Updated Name", "unitPrice": 25.99}'></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="updateItem()">Update Item</button>
+                    <div class="response" id="updateResponse"></div>
+                </div>
+
+                <!-- Delete Item -->
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method delete">DELETE</span>
+                        <span class="endpoint-title">Delete Inventory Item</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Item ID to Delete</label>
+                        <input type="text" class="form-control" id="deleteItemId" placeholder="MongoDB ObjectId">
+                    </div>
+                    <button class="btn btn-danger" onclick="deleteItem()">Delete Item</button>
+                    <div class="response" id="deleteResponse"></div>
+                </div>
+            </div>
+
+            <!-- Stock Management -->
+            <div class="section">
+                <h2>📊 Stock Management</h2>
+
+                <!-- Update Stock -->
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method patch">PATCH</span>
+                        <span class="endpoint-title">Update Stock Levels</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Item ID</label>
+                        <input type="text" class="form-control" id="stockItemId" placeholder="MongoDB ObjectId">
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Operation</label>
+                                <select class="form-control" id="stockOperation">
+                                    <option value="add">Add Stock</option>
+                                    <option value="subtract">Subtract Stock</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Quantity</label>
+                                <input type="number" class="form-control" id="stockQuantity" placeholder="0" min="1">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Reason</label>
+                        <input type="text" class="form-control" id="stockReason" placeholder="e.g., Received shipment, Used for job">
+                    </div>
+                    <button class="btn btn-primary" onclick="updateStock()">Update Stock</button>
+                    <div class="response" id="stockResponse"></div>
+                </div>
+
+                <!-- Low Stock Items -->
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-title">Get Low Stock Items</span>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Category Filter</label>
+                                <select class="form-control" id="lowStockCategory">
+                                    <option value="">All Categories</option>
+                                    <option value="parts">Parts</option>
+                                    <option value="tools">Tools</option>
+                                    <option value="fluids">Fluids</option>
+                                    <option value="consumables">Consumables</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Limit</label>
+                                <input type="number" class="form-control" id="lowStockLimit" value="20" min="1">
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="getLowStock()">Get Low Stock</button>
+                    <div class="response" id="lowStockResponse"></div>
+                </div>
+            </div>
+
+            <!-- Search & Reports -->
+            <div class="section">
+                <h2>🔍 Search & Reports</h2>
+
+                <!-- Search Items -->
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-title">Search Inventory Items</span>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Search Query</label>
+                                <input type="text" class="form-control" id="searchQuery" placeholder="e.g., brake, oil, filter">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Category Filter</label>
+                                <select class="form-control" id="searchCategory">
+                                    <option value="">All Categories</option>
+                                    <option value="parts">Parts</option>
+                                    <option value="tools">Tools</option>
+                                    <option value="fluids">Fluids</option>
+                                    <option value="consumables">Consumables</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="searchItems()">Search</button>
+                    <div class="response" id="searchResponse"></div>
+                </div>
+
+                <!-- Inventory Statistics -->
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-title">Get Inventory Statistics</span>
+                    </div>
+                    <button class="btn btn-primary" onclick="getStats()">Get Statistics</button>
+                    <div class="response" id="statsResponse"></div>
+                </div>
+
+                <!-- Items by Category -->
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-title">Get Items by Category</span>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select class="form-control" id="categorySelect">
+                                    <option value="parts">Parts</option>
+                                    <option value="tools">Tools</option>
+                                    <option value="fluids">Fluids</option>
+                                    <option value="consumables">Consumables</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Limit</label>
+                                <input type="number" class="form-control" id="categoryLimit" value="50" min="1">
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="getItemsByCategory()">Get Items</button>
+                    <div class="response" id="categoryResponse"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api/v1/inventory';
+        let authToken = localStorage.getItem('authToken') || '';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            if (authToken) {
+                document.getElementById('tokenInput').value = authToken;
+                updateAuthStatus();
+            }
+        });
+
+        // Token management
+        function setToken() {
+            const token = document.getElementById('tokenInput').value.trim();
+            if (token) {
+                authToken = token;
+                localStorage.setItem('authToken', token);
+                updateAuthStatus();
+            }
+        }
+
+        function clearToken() {
+            authToken = '';
+            localStorage.removeItem('authToken');
+            document.getElementById('tokenInput').value = '';
+            updateAuthStatus();
+        }
+
+        function updateAuthStatus() {
+            const indicator = document.getElementById('authIndicator');
+            const status = document.getElementById('authStatus');
+            const userInfo = document.getElementById('userInfo');
+
+            if (authToken) {
+                indicator.classList.add('authenticated');
+                status.textContent = 'Authenticated';
+                userInfo.textContent = '(Token set)';
+            } else {
+                indicator.classList.remove('authenticated');
+                status.textContent = 'Not Authenticated';
+                userInfo.textContent = '';
+            }
+        }
+
+        // API helper
+        async function makeRequest(endpoint, method = 'GET', data = null) {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+
+            if (authToken) {
+                headers.Authorization = `Bearer ${authToken}`;
+            }
+
+            const config = {
+                method,
+                headers
+            };
+
+            if (data) {
+                config.body = JSON.stringify(data);
+            }
+
+            try {
+                const response = await fetch(endpoint, config);
+                const result = await response.json();
+                
+                return {
+                    status: response.status,
+                    data: result,
+                    success: response.ok
+                };
+            } catch (error) {
+                return {
+                    status: 0,
+                    data: { error: error.message },
+                    success: false
+                };
+            }
+        }
+
+        function showResponse(elementId, response) {
+            const element = document.getElementById(elementId);
+            element.classList.remove('success', 'error');
+            element.classList.add(response.success ? 'success' : 'error');
+            element.classList.add('show');
+            
+            element.innerHTML = `
+                <strong>Status:</strong> ${response.status}<br>
+                <strong>Response:</strong>
+                <pre>${JSON.stringify(response.data, null, 2)}</pre>
+            `;
+        }
+
+        // CRUD Operations
+        async function createItem() {
+            const data = {
+                name: document.getElementById('createName').value,
+                category: document.getElementById('createCategory').value,
+                unitPrice: parseFloat(document.getElementById('createPrice').value),
+                unit: document.getElementById('createUnit').value,
+                description: document.getElementById('createDescription').value,
+                currentStock: parseInt(document.getElementById('createStock').value) || 0,
+                minimumStock: parseInt(document.getElementById('createMinStock').value) || 0
+            };
+
+            const response = await makeRequest(API_BASE, 'POST', data);
+            showResponse('createResponse', response);
+        }
+
+        async function getAllItems() {
+            const category = document.getElementById('getAllCategory').value;
+            const status = document.getElementById('getAllStatus').value;
+            const page = document.getElementById('getAllPage').value;
+            const limit = document.getElementById('getAllLimit').value;
+
+            const params = new URLSearchParams();
+            if (category) params.append('category', category);
+            if (status) params.append('status', status);
+            if (page) params.append('page', page);
+            if (limit) params.append('limit', limit);
+
+            const response = await makeRequest(`${API_BASE}?${params}`);
+            showResponse('getAllResponse', response);
+        }
+
+        async function getItemById() {
+            const itemId = document.getElementById('getItemId').value.trim();
+            if (!itemId) return;
+
+            // Check if it's a custom itemId (starts with ITM) or MongoDB ObjectId
+            const endpoint = itemId.startsWith('ITM') ? 
+                `${API_BASE}/item/${itemId}` : 
+                `${API_BASE}/${itemId}`;
+
+            const response = await makeRequest(endpoint);
+            showResponse('getItemResponse', response);
+        }
+
+        async function updateItem() {
+            const itemId = document.getElementById('updateItemId').value.trim();
+            const dataStr = document.getElementById('updateData').value.trim();
+
+            if (!itemId || !dataStr) return;
+
+            try {
+                const data = JSON.parse(dataStr);
+                const response = await makeRequest(`${API_BASE}/${itemId}`, 'PATCH', data);
+                showResponse('updateResponse', response);
+            } catch (error) {
+                showResponse('updateResponse', {
+                    status: 0,
+                    data: { error: 'Invalid JSON data' },
+                    success: false
+                });
+            }
+        }
+
+        async function deleteItem() {
+            const itemId = document.getElementById('deleteItemId').value.trim();
+            if (!itemId) return;
+
+            const response = await makeRequest(`${API_BASE}/${itemId}`, 'DELETE');
+            showResponse('deleteResponse', response);
+        }
+
+        // Stock Management
+        async function updateStock() {
+            const itemId = document.getElementById('stockItemId').value.trim();
+            const operation = document.getElementById('stockOperation').value;
+            const quantity = parseInt(document.getElementById('stockQuantity').value);
+            const reason = document.getElementById('stockReason').value;
+
+            if (!itemId || !quantity) return;
+
+            const data = { operation, quantity, reason };
+            const response = await makeRequest(`${API_BASE}/${itemId}/stock`, 'PATCH', data);
+            showResponse('stockResponse', response);
+        }
+
+        async function getLowStock() {
+            const category = document.getElementById('lowStockCategory').value;
+            const limit = document.getElementById('lowStockLimit').value;
+
+            const params = new URLSearchParams();
+            if (category) params.append('category', category);
+            if (limit) params.append('limit', limit);
+
+            const response = await makeRequest(`${API_BASE}/low-stock?${params}`);
+            showResponse('lowStockResponse', response);
+        }
+
+        // Search & Reports
+        async function searchItems() {
+            const query = document.getElementById('searchQuery').value.trim();
+            const category = document.getElementById('searchCategory').value;
+
+            if (!query) return;
+
+            const params = new URLSearchParams({ q: query });
+            if (category) params.append('category', category);
+
+            const response = await makeRequest(`${API_BASE}/search?${params}`);
+            showResponse('searchResponse', response);
+        }
+
+        async function getStats() {
+            const response = await makeRequest(`${API_BASE}/stats`);
+            showResponse('statsResponse', response);
+        }
+
+        async function getItemsByCategory() {
+            const category = document.getElementById('categorySelect').value;
+            const limit = document.getElementById('categoryLimit').value;
+
+            const params = new URLSearchParams();
+            if (limit) params.append('limit', limit);
+
+            const response = await makeRequest(`${API_BASE}/category/${category}?${params}`);
+            showResponse('categoryResponse', response);
+        }
+
+        // Quick Actions
+        function searchSample() {
+            document.getElementById('searchQuery').value = 'brake';
+            searchItems();
+        }
+
+        function createSampleItem() {
+            document.getElementById('createName').value = 'Sample Brake Pads';
+            document.getElementById('createCategory').value = 'parts';
+            document.getElementById('createPrice').value = '45.99';
+            document.getElementById('createUnit').value = 'set';
+            document.getElementById('createDescription').value = 'High-quality brake pads for sedans';
+            document.getElementById('createStock').value = '25';
+            document.getElementById('createMinStock').value = '5';
+        }
+    </script>
+</body>
+</html>

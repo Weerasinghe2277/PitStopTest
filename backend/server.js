@@ -5,6 +5,9 @@ import notFound from "./middleware/not-found.js";
 import errorHandlerMiddleware from "./middleware/error-handler.js";
 
 import users from "./routes/users.js";
+import inventory from "./routes/inventory.js";
+import vehicles from "./routes/vehicles.js";
+import invoices from "./routes/invoices.js";
 
 dotenv.config();
 
@@ -26,6 +29,9 @@ app.use(express.urlencoded({ extended: true }));
 
 //routes
 app.use("/api/v1/users", users);
+app.use("/api/v1/inventory", inventory);
+app.use("/api/v1/vehicles", vehicles);
+app.use("/api/v1/invoices", invoices);
 
 app.use(notFound);
 app.use(errorHandlerMiddleware);
