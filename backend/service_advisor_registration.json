@@ -1,0 +1,59 @@
+{
+  "email": "advisor.saman@example.com",
+  "password": "SecurePassword123!",
+  "role": "service_advisor",
+  "profile": {
+    "firstName": "Saman",
+    "lastName": "Perera",
+    "phoneNumber": "0771234567",
+    "address": {
+      "street": "123 Main Road",
+      "city": "Colombo",
+      "province": "Western",
+      "postalCode": "00500"
+    },
+    "nic": "199345678901",
+    "dateOfBirth": "1993-05-20"
+  },
+  "employeeDetails": {
+    "employeeId": "CS001",
+    "department": "customer_service",
+    "specializations": [
+      "diagnostics",
+      "customer_relations"
+    ],
+    "certifications": [
+      {
+        "name": "Customer Service Excellence",
+        "issuedBy": "SL Automobile Association",
+        "issueDate": "2020-01-15",
+        "expiryDate": "2025-01-15",
+        "certificateNumber": "CSE2020-001"
+      },
+      {
+        "name": "Automotive Diagnostics Level 2",
+        "issuedBy": "Institute of Motor Industry",
+        "issueDate": "2021-06-10",
+        "expiryDate": "2026-06-10",
+        "certificateNumber": "AD2021-087"
+      }
+    ],
+    "joinDate": "2021-03-10",
+    "baseSalary": 85000,
+    "commissionRate": 5
+  },
+  "preferences": {
+    "language": "en",
+    "notifications": {
+      "email": true,
+      "sms": true,
+      "push": false,
+      "marketing": false
+    },
+    "timezone": "Asia/Colombo"
+  },
+  "status": "active",
+  "emailVerified": true,
+  "phoneVerified": true,
+  "twoFactorEnabled": false
+}

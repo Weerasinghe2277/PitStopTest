@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leave Request API Test - PitStop System</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .main-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      font-size: 1.1em;
+      opacity: 0.9;
+    }
+
+    .content {
+      padding: 30px;
+    }
+
+    .section {
+      background: #f8f9fa;
+      margin: 20px 0;
+      border-radius: 10px;
+      padding: 25px;
+      border-left: 5px solid #007bff;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .section h2 {
+      color: #2c3e50;
+      margin-bottom: 20px;
+      font-size: 1.5em;
+      display: flex;
+      align-items: center;
+    }
+
+    .section h2::before {
+      content: "🔧";
+      margin-right: 10px;
+      font-size: 1.2em;
+    }
+
+    .auth-section h2::before {
+      content: "🔐";
+    }
+
+    .employee-section h2::before {
+      content: "👤";
+    }
+
+    .admin-section h2::before {
+      content: "👨‍💼";
+    }
+
+    .stats-section h2::before {
+      content: "📊";
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #555;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.3s ease;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+
+    button {
+      background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+      color: white;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      margin: 5px 5px 5px 0;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+      color: #212529;
+    }
+
+    .result {
+      background: #2d3748;
+      color: #e2e8f0;
+      padding: 20px;
+      margin: 15px 0;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.4;
+      max-height: 400px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      border: 1px solid #4a5568;
+    }
+
+    .success {
+      border-left: 5px solid #28a745;
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .error {
+      border-left: 5px solid #dc3545;
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .token-display {
+      background: #e9ecef;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 12px;
+      word-break: break-all;
+      margin: 10px 0;
+    }
+
+    .quick-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+
+    .test-data {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 15px 0;
+    }
+
+    .test-data h4 {
+      color: #856404;
+      margin-bottom: 10px;
+    }
+
+    .test-data code {
+      background: #f8f9fa;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+
+    @media (max-width: 768px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-actions {
+        flex-direction: column;
+      }
+
+      .content {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="main-container">
+    <div class="header">
+      <h1>🚗 PitStop Leave Request API Test</h1>
+      <p>Complete testing interface for employee leave management system</p>
+    </div>
+
+    <div class="content">
+      <!-- Authentication Section -->
+      <div class="section auth-section">
+        <h2>Authentication Setup</h2>
+        <div class="test-data">
+          <h4>📝 Test Instructions:</h4>
+          <p>1. First, register/login a user using the <code>/api/v1/users/login</code> endpoint</p>
+          <p>2. Copy the JWT token from the response</p>
+          <p>3. Paste it in the field below and click "Set Token"</p>
+        </div>
+
+        <div class="form-group">
+          <label for="authToken">JWT Token (Bearer Token):</label>
+          <textarea id="authToken" rows="3" placeholder="Paste your JWT token here..."></textarea>
+        </div>
+
+        <div class="quick-actions">
+          <button onclick="setAuthToken()" class="btn-success">🔑 Set Token</button>
+          <button onclick="clearToken()" class="btn-danger">🗑️ Clear Token</button>
+          <button onclick="testConnection()" class="btn-warning">🔍 Test Connection</button>
+        </div>
+
+        <div class="token-display">
+          <strong>Current Token Status:</strong> <span id="tokenStatus">❌ Not Set</span>
+        </div>
+      </div>
+
+      <!-- Employee Functions -->
+      <div class="section employee-section">
+        <h2>Employee Functions</h2>
+
+        <!-- Create Leave Request -->
+        <div class="form-group">
+          <h3>📝 Create Leave Request</h3>
+          <div class="form-row">
+            <div>
+              <label for="leaveType">Leave Type:</label>
+              <select id="leaveType">
+                <option value="">Select Leave Type</option>
+                <option value="annual">🏖️ Annual Leave</option>
+                <option value="sick">🤒 Sick Leave</option>
+                <option value="emergency">🚨 Emergency Leave</option>
+                <option value="maternity">👶 Maternity Leave</option>
+                <option value="paternity">👨‍👶 Paternity Leave</option>
+                <option value="unpaid">💸 Unpaid Leave</option>
+              </select>
+            </div>
+            <div>
+              <label for="startDate">Start Date:</label>
+              <input type="date" id="startDate">
+            </div>
+            <div>
+              <label for="endDate">End Date:</label>
+              <input type="date" id="endDate">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="reason">Reason for Leave:</label>
+            <textarea id="reason" rows="3"
+              placeholder="Please provide a detailed reason for your leave request..."></textarea>
+          </div>
+          <button onclick="createLeaveRequest()" class="btn-success">➕ Submit Leave Request</button>
+          <div id="createResult" class="result"></div>
+        </div>
+
+        <!-- Get My Leave Requests -->
+        <div class="form-group">
+          <h3>📋 My Leave Requests</h3>
+          <div class="form-row">
+            <div>
+              <label for="myStatus">Filter by Status:</label>
+              <select id="myStatus">
+                <option value="">All Status</option>
+                <option value="pending">⏳ Pending</option>
+                <option value="approved">✅ Approved</option>
+                <option value="rejected">❌ Rejected</option>
+              </select>
+            </div>
+            <div>
+              <label for="myPage">Page:</label>
+              <input type="number" id="myPage" value="1" min="1">
+            </div>
+            <div>
+              <label for="myLimit">Items per page:</label>
+              <input type="number" id="myLimit" value="10" min="1" max="50">
+            </div>
+          </div>
+          <button onclick="getMyLeaveRequests()" class="btn-success">📖 Get My Requests</button>
+          <div id="myRequestsResult" class="result"></div>
+        </div>
+
+        <!-- Update/Delete Leave Request -->
+        <div class="form-group">
+          <h3>✏️ Update/Delete Leave Request</h3>
+          <div class="form-row">
+            <div>
+              <label for="updateId">Leave Request ID:</label>
+              <input type="text" id="updateId" placeholder="Enter leave request ID">
+            </div>
+            <div>
+              <label for="updateType">New Leave Type (optional):</label>
+              <select id="updateType">
+                <option value="">Keep Current</option>
+                <option value="annual">🏖️ Annual Leave</option>
+                <option value="sick">🤒 Sick Leave</option>
+                <option value="emergency">🚨 Emergency Leave</option>
+                <option value="maternity">👶 Maternity Leave</option>
+                <option value="paternity">👨‍👶 Paternity Leave</option>
+                <option value="unpaid">💸 Unpaid Leave</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label for="updateStartDate">New Start Date (optional):</label>
+              <input type="date" id="updateStartDate">
+            </div>
+            <div>
+              <label for="updateEndDate">New End Date (optional):</label>
+              <input type="date" id="updateEndDate">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="updateReason">New Reason (optional):</label>
+            <textarea id="updateReason" rows="3" placeholder="Enter new reason if you want to update it..."></textarea>
+          </div>
+          <div class="quick-actions">
+            <button onclick="updateLeaveRequest()" class="btn-warning">✏️ Update Request</button>
+            <button onclick="deleteLeaveRequest()" class="btn-danger">🗑️ Delete Request</button>
+            <button onclick="getLeaveRequestById()" class="btn-success">👁️ View Request</button>
+          </div>
+          <div id="updateResult" class="result"></div>
+        </div>
+      </div>
+
+      <!-- Admin/Manager Functions -->
+      <div class="section admin-section">
+        <h2>Admin/Manager Functions</h2>
+
+        <!-- Get All Leave Requests -->
+        <div class="form-group">
+          <h3>📊 All Leave Requests</h3>
+          <div class="form-row">
+            <div>
+              <label for="allStatus">Status Filter:</label>
+              <select id="allStatus">
+                <option value="">All Status</option>
+                <option value="pending">⏳ Pending</option>
+                <option value="approved">✅ Approved</option>
+                <option value="rejected">❌ Rejected</option>
+              </select>
+            </div>
+            <div>
+              <label for="allType">Leave Type Filter:</label>
+              <select id="allType">
+                <option value="">All Types</option>
+                <option value="annual">🏖️ Annual Leave</option>
+                <option value="sick">🤒 Sick Leave</option>
+                <option value="emergency">🚨 Emergency Leave</option>
+                <option value="maternity">👶 Maternity Leave</option>
+                <option value="paternity">👨‍👶 Paternity Leave</option>
+                <option value="unpaid">💸 Unpaid Leave</option>
+              </select>
+            </div>
+            <div>
+              <label for="department">Department Filter:</label>
+              <select id="department">
+                <option value="">All Departments</option>
+                <option value="mechanical">🔧 Mechanical</option>
+                <option value="electrical">⚡ Electrical</option>
+                <option value="bodywork">🚗 Bodywork</option>
+                <option value="detailing">✨ Detailing</option>
+                <option value="customer_service">🤝 Customer Service</option>
+                <option value="management">👔 Management</option>
+                <option value="front_desk">🏢 Front Desk</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label for="dateFrom">From Date:</label>
+              <input type="date" id="dateFrom">
+            </div>
+            <div>
+              <label for="dateTo">To Date:</label>
+              <input type="date" id="dateTo">
+            </div>
+            <div>
+              <label for="allPage">Page:</label>
+              <input type="number" id="allPage" value="1" min="1">
+            </div>
+            <div>
+              <label for="allLimit">Limit:</label>
+              <input type="number" id="allLimit" value="10" min="1" max="50">
+            </div>
+          </div>
+          <button onclick="getAllLeaveRequests()" class="btn-success">📋 Get All Requests</button>
+          <div id="allRequestsResult" class="result"></div>
+        </div>
+
+        <!-- Approve/Reject Leave Request -->
+        <div class="form-group">
+          <h3>✅❌ Approve/Reject Leave Request</h3>
+          <div class="form-row">
+            <div>
+              <label for="approveId">Leave Request ID:</label>
+              <input type="text" id="approveId" placeholder="Enter leave request ID to approve/reject">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="rejectionReason">Rejection Reason (required for rejection):</label>
+            <textarea id="rejectionReason" rows="3" placeholder="Enter reason for rejection..."></textarea>
+          </div>
+          <div class="quick-actions">
+            <button onclick="approveLeaveRequest()" class="btn-success">✅ Approve Request</button>
+            <button onclick="rejectLeaveRequest()" class="btn-danger">❌ Reject Request</button>
+          </div>
+          <div id="approveResult" class="result"></div>
+        </div>
+      </div>
+
+      <!-- Statistics and Reports -->
+      <div class="section stats-section">
+        <h2>Statistics & Reports</h2>
+
+        <!-- Leave Statistics -->
+        <div class="form-group">
+          <h3>📈 Leave Statistics</h3>
+          <div class="form-row">
+            <div>
+              <label for="statsStartDate">Start Date (optional):</label>
+              <input type="date" id="statsStartDate">
+            </div>
+            <div>
+              <label for="statsEndDate">End Date (optional):</label>
+              <input type="date" id="statsEndDate">
+            </div>
+          </div>
+          <button onclick="getLeaveStats()" class="btn-success">📊 Get Statistics</button>
+          <div id="statsResult" class="result"></div>
+        </div>
+
+        <!-- Upcoming Leaves -->
+        <div class="form-group">
+          <h3>📅 Upcoming Leaves</h3>
+          <div class="form-row">
+            <div>
+              <label for="upcomingDays">Days Ahead:</label>
+              <input type="number" id="upcomingDays" value="30" min="1" max="365">
+            </div>
+          </div>
+          <button onclick="getUpcomingLeaves()" class="btn-success">📅 Get Upcoming Leaves</button>
+          <div id="upcomingResult" class="result"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const baseURL = 'http://localhost:5000/api/v1/leave-requests';
+    let authToken = '';
+
+    // Set default dates to today and tomorrow
+    document.addEventListener('DOMContentLoaded', function () {
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const todayStr = today.toISOString().split('T')[0];
+      const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+      document.getElementById('startDate').value = todayStr;
+      document.getElementById('endDate').value = tomorrowStr;
+    });
+
+    function setAuthToken() {
+      authToken = document.getElementById('authToken').value.trim();
+      if (authToken) {
+        document.getElementById('tokenStatus').innerHTML = '✅ Token Set';
+        document.getElementById('tokenStatus').style.color = '#28a745';
+        showNotification('Token set successfully!', 'success');
+      } else {
+        document.getElementById('tokenStatus').innerHTML = '❌ Token Empty';
+        document.getElementById('tokenStatus').style.color = '#dc3545';
+        showNotification('Please enter a valid token!', 'error');
+      }
+    }
+
+    function clearToken() {
+      authToken = '';
+      document.getElementById('authToken').value = '';
+      document.getElementById('tokenStatus').innerHTML = '❌ Not Set';
+      document.getElementById('tokenStatus').style.color = '#dc3545';
+      showNotification('Token cleared!', 'info');
+    }
+
+    async function testConnection() {
+      if (!authToken) {
+        showNotification('Please set a token first!', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${baseURL}/my-requests?limit=1`, {
+          headers: getHeaders()
+        });
+
+        if (response.ok) {
+          showNotification('✅ Connection successful!', 'success');
+        } else {
+          showNotification(`❌ Connection failed: ${response.status}`, 'error');
+        }
+      } catch (error) {
+        showNotification(`❌ Connection error: ${error.message}`, 'error');
+      }
+    }
+
+    function getHeaders() {
+      return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      };
+    }
+
+    function displayResult(elementId, data, success = true) {
+      const element = document.getElementById(elementId);
+      element.textContent = JSON.stringify(data, null, 2);
+      element.className = success ? 'result success' : 'result error';
+
+      // Auto-scroll to result
+      element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function showNotification(message, type = 'info') {
+      // Create notification element
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: bold;
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+            `;
+
+      switch (type) {
+        case 'success':
+          notification.style.background = '#28a745';
+          break;
+        case 'error':
+          notification.style.background = '#dc3545';
+          break;
+        default:
+          notification.style.background = '#007bff';
+      }
+
+      notification.textContent = message;
+      document.body.appendChild(notification);
+
+      // Remove after 3 seconds
+      setTimeout(() => {
+        notification.remove();
+      }, 3000);
+    }
+
+    // API Functions
+    async function createLeaveRequest() {
+      if (!authToken) {
+        showNotification('Please set authentication token first!', 'error');
+        return;
+      }
+
+      try {
+        const data = {
+          leaveType: document.getElementById('leaveType').value,
+          startDate: document.getElementById('startDate').value,
+          endDate: document.getElementById('endDate').value,
+          reason: document.getElementById('reason').value
+        };
+
+        if (!data.leaveType || !data.startDate || !data.endDate || !data.reason) {
+          showNotification('Please fill all required fields!', 'error');
+          return;
+        }
+
+        const response = await fetch(baseURL, {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        displayResult('createResult', result, response.ok);
+
+        if (response.ok) {
+          showNotification('Leave request created successfully!', 'success');
+          // Clear form
+          document.getElementById('leaveType').value = '';
+          document.getElementById('reason').value = '';
+        }
+      } catch (error) {
+        displayResult('createResult', { error: error.message }, false);
+        showNotification('Error creating leave request!', 'error');
+      }
+    }
+
+    async function getMyLeaveRequests() {
+      if (!authToken) {
+        showNotification('Please set authentication token first!', 'error');
+        return;
+      }
+
+      try {
+        const params = new URLSearchParams();
+        const status = document.getElementById('myStatus').value;
+        const page = document.getElementById('myPage').value;
+        const limit = document.getElementById('myLimit').value;
+
+        if (status) params.append('status', status);
+        if (page) params.append('page', page);
+        if (limit) params.append('limit', limit);
+
+        const response = await fetch(`${baseURL}/my-requests?${params}`, {
+          headers: getHeaders()
+        });
+
+        const result = await response.json();
+        displayResult('myRequestsResult', result, response.ok);
+
+        if (response.ok) {
+          showNotification(`Found ${result.count} leave requests`, 'success');
+        }
+      } catch (error) {
+        displayResult('myRequestsResult', { error: error.message }, false);
+        showNotification('Error fetching leave requests!', 'error');
+      }
+    }
+
+    async function getAllLeaveRequests() {
+      if (!authToken) {
+        showNotification('Please set authentication token first!', 'error');
+        return;
+      }
+
+      try {
+        const params = new URLSearchParams();
+        const status = document.getElementById('allStatus').value;
+        const leaveType = document.getElementById('allType').value;
+        const department = document.getElementById('department').value;
+        const startDate = document.getElementById('dateFrom').value;
+        const endDate = document.getElementById('dateTo').value;
+        const page = document.getElementById('allPage').value;
+        const limit = document.getElementById('allLimit').value;
+
+        if (status) params.append('status', status);
+        if (leaveType) params.append('leaveType', leaveType);
+        if (department) params.append('department', department);
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+        if (page) params.append('page', page);
+        if (limit) params.append('limit', limit);
+
+        const response = await fetch(`${baseURL}?${params}`, {
+          headers: getHeaders()
+        });
+
+        const result = await response.json();
+        displayResult('allRequestsResult', result, response.ok);
+
+        if (response.ok) {
+          showNotification(`Found ${result.count} leave requests`, 'success');
+        }
+      } catch (error) {
+        displayResult('allRequestsResult', { error: error.message }, false);
+        showNotification('Error fetching all leave requests!', 'error');
+      }
+    }
+
+    async function getLeaveRequestById() {
+      if (!authToken) {
+        showNotification('Please set authentication token first!', 'error');
+        return;
+      }
+
+      const id = document.getElementById('updateId').value;
+      if (!id) {
+        showNotification('Please enter a leave request ID!', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${baseURL}/${id}`, {
+          headers: getHeaders()
+        });
+
+        const result = await response.json();
+        displayResult('updateResult', result, response.ok);
+
+        if (response.ok) {
+          showNotification('Leave request fetched successfully!', 'success');
+        }
+      } catch (error) {
+        displayResult('updateResult', { error: error.message }, false);
+        showNotification('Error fetching leave request!', 'error');
+      }
+    }
+
+    async function updateLeaveRequest() {
+      if (!authToken) {
+        showNotification('Please set authentication token first!', 'error');
+        return;
+      }
+
+      const id = document.getElementById('updateId').value;
+      if (!id) {
+        showNotification('Please enter a leave request ID!', 'error');
+        return;
+      }
+
+      try {
+        const data = {};
+
+        const leaveType = document.getElementById('updateType').value;
+        const startDate = document.getElementById('updateStartDate').value;
+        const endDate = document.getElementById('updateEndDate').value;
+        const reason = document.getElementById('updateReason').value;
+
+        if (leaveType) data.leaveType = leaveType;
+        if (startDate) data.startDate = startDate;
+        if (endDate) data.endDate = endDate;
+        if (reason) data.reason = reason;
+
+        if (Object.keys(data).length === 0) {
+          showNotification('Please provide at least one field to update!', 'error');
+          return;
+        }
+
+        const response = await fetch(`${baseURL}/${id}`, {
+          method: 'PATCH',
+          headers: getHeaders(),
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        displayResult('updateResult', result, response.ok);
+
+        if (response.ok) {
+          showNotification('Leave request updated successfully!', 'success');
+        }
+      } catch (error) {
+        displayResult('updateResult', { error: error.message }, false);
+        showNotification('Error updating leave request!', 'error');
+      }
+    }
+
+    async function deleteLeaveRequest() {
+      if (!authToken) {
+        showNotification('Please set authentication token first!', 'error');
+        return;
+      }
+
+      const id = document.getElementById('updateId').value;
+      if (!id) {
+        showNotification('Please enter a leave request ID!', 'error');
+        return;
+      }
+
+      if (!confirm('Are you sure you want to delete this leave request?')) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`${baseURL}/${id}`, {
+          method: 'DELETE',
+          headers: getHeaders()
+        });
+
+        const result = await response.json();
+        displayResult('updateResult', result, response.ok);
+
+        if (response.ok) {
+          showNotification('Leave request deleted successfully!', 'success');
+          document.getElementById('updateId').value = '';
+        }
+      } catch (error) {
+        displayResult('updateResult', { error: error.message }, false);
+        showNotification('Error deleting leave request!', 'error');
+      }
+    }
+
+    async function approveLeaveRequest() {
+      if (!authToken) {
+        showNotification('Please set authentication token first!', 'error');
+        return;
+      }
+
+      const id = document.getElementById('approveId').value;
+      if (!id) {
+        showNotification('Please enter a leave request ID!', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${baseURL}/${id}/approve`, {
+          method: 'PATCH',
+          headers: getHeaders()
+        });
+
+        const result = await response.json();
+        displayResult('approveResult', result, response.ok);
+
+        if (response.ok) {
+          showNotification('Leave request approved successfully!', 'success');
+        }
+      } catch (error) {
+        displayResult('approveResult', { error: error.message }, false);
+        showNotification('Error approving leave request!', 'error');
+      }
+    }
+
+    async function rejectLeaveRequest() {
+      if (!authToken) {
+        showNotification('Please set authentication token first!', 'error');
+        return;
+      }
+
+      const id = document.getElementById('approveId').value;
+      const rejectionReason = document.getElementById('rejectionReason').value;
+
+      if (!id) {
+        showNotification('Please enter a leave request ID!', 'error');
+        return;
+      }
+
+      if (!rejectionReason) {
+        showNotification('Please provide a rejection reason!', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${baseURL}/${id}/reject`, {
+          method: 'PATCH',
+          headers: getHeaders(),
+          body: JSON.stringify({ rejectionReason })
+        });
+
+        const result = await response.json();
+        displayResult('approveResult', result, response.ok);
+
+        if (response.ok) {
+          showNotification('Leave request rejected successfully!', 'success');
+          document.getElementById('rejectionReason').value = '';
+        }
+      } catch (error) {
+        displayResult('approveResult', { error: error.message }, false);
+        showNotification('Error rejecting leave request!', 'error');
+      }
+    }
+
+    async function getLeaveStats() {
+      if (!authToken) {
+        showNotification('Please set authentication token first!', 'error');
+        return;
+      }
+
+      try {
+        const params = new URLSearchParams();
+        const startDate = document.getElementById('statsStartDate').value;
+        const endDate = document.getElementById('statsEndDate').value;
+
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+
+        const response = await fetch(`${baseURL}/stats?${params}`, {
+          headers: getHeaders()
+        });
+
+        const result = await response.json();
+        displayResult('statsResult', result, response.ok);
+
+        if (response.ok) {
+          showNotification('Statistics fetched successfully!', 'success');
+        }
+      } catch (error) {
+        displayResult('statsResult', { error: error.message }, false);
+        showNotification('Error fetching statistics!', 'error');
+      }
+    }
+
+    async function getUpcomingLeaves() {
+      if (!authToken) {
+        showNotification('Please set authentication token first!', 'error');
+        return;
+      }
+
+      try {
+        const days = document.getElementById('upcomingDays').value;
+        const params = new URLSearchParams();
+        if (days) params.append('days', days);
+
+        const response = await fetch(`${baseURL}/upcoming?${params}`, {
+          headers: getHeaders()
+        });
+
+        const result = await response.json();
+        displayResult('upcomingResult', result, response.ok);
+
+        if (response.ok) {
+          showNotification(`Found ${result.count} upcoming leaves`, 'success');
+        }
+      } catch (error) {
+        displayResult('upcomingResult', { error: error.message }, false);
+        showNotification('Error fetching upcoming leaves!', 'error');
+      }
+    }
+
+    // Add CSS animation for notifications
+    const style = document.createElement('style');
+    style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+        `;
+    document.head.appendChild(style);
+  </script>
+</body>
+
+</html>

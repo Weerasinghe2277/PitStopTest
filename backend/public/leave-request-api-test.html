@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leave Request API Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .container {
+      background: #f4f4f4;
+      padding: 20px;
+      margin: 10px 0;
+      border-radius: 5px;
+    }
+
+    .result {
+      background: #e8e8e8;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 5px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background: #007bff;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px 5px 5px 0;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .error {
+      background: #ffebee;
+      color: #c62828;
+      border: 1px solid #ffcdd2;
+    }
+
+    .success {
+      background: #e8f5e8;
+      color: #2e7d32;
+      border: 1px solid #c8e6c9;
+    }
+
+    .flex {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .flex input {
+      width: auto;
+      flex: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Leave Request API Test Interface</h1>
+
+  <!-- Authentication Section -->
+  <div class="container">
+    <h2>Authentication</h2>
+    <div class="flex">
+      <input type="text" id="authToken" placeholder="JWT Token (Bearer token)">
+      <button onclick="setAuthToken()">Set Token</button>
+    </div>
+    <p>Current Token: <span id="currentToken">Not set</span></p>
+  </div>
+
+  <!-- Create Leave Request -->
+  <div class="container">
+    <h2>Create Leave Request</h2>
+    <select id="leaveType">
+      <option value="">Select Leave Type</option>
+      <option value="annual">Annual</option>
+      <option value="sick">Sick</option>
+      <option value="emergency">Emergency</option>
+      <option value="maternity">Maternity</option>
+      <option value="paternity">Paternity</option>
+      <option value="unpaid">Unpaid</option>
+    </select>
+    <input type="date" id="startDate" placeholder="Start Date">
+    <input type="date" id="endDate" placeholder="End Date">
+    <textarea id="reason" placeholder="Reason for leave" rows="3"></textarea>
+    <button onclick="createLeaveRequest()">Create Leave Request</button>
+    <div id="createResult" class="result"></div>
+  </div>
+
+  <!-- Get My Leave Requests -->
+  <div class="container">
+    <h2>Get My Leave Requests</h2>
+    <div class="flex">
+      <select id="myRequestsStatus">
+        <option value="">All Status</option>
+        <option value="pending">Pending</option>
+        <option value="approved">Approved</option>
+        <option value="rejected">Rejected</option>
+      </select>
+      <input type="number" id="myRequestsPage" placeholder="Page" value="1" min="1">
+      <input type="number" id="myRequestsLimit" placeholder="Limit" value="10" min="1">
+      <button onclick="getMyLeaveRequests()">Get My Requests</button>
+    </div>
+    <div id="myRequestsResult" class="result"></div>
+  </div>
+
+  <!-- Get All Leave Requests (Admin/Manager) -->
+  <div class="container">
+    <h2>Get All Leave Requests (Admin/Manager Only)</h2>
+    <div class="flex">
+      <select id="allRequestsStatus">
+        <option value="">All Status</option>
+        <option value="pending">Pending</option>
+        <option value="approved">Approved</option>
+        <option value="rejected">Rejected</option>
+      </select>
+      <select id="allRequestsType">
+        <option value="">All Types</option>
+        <option value="annual">Annual</option>
+        <option value="sick">Sick</option>
+        <option value="emergency">Emergency</option>
+        <option value="maternity">Maternity</option>
+        <option value="paternity">Paternity</option>
+        <option value="unpaid">Unpaid</option>
+      </select>
+      <select id="department">
+        <option value="">All Departments</option>
+        <option value="mechanical">Mechanical</option>
+        <option value="electrical">Electrical</option>
+        <option value="bodywork">Bodywork</option>
+        <option value="detailing">Detailing</option>
+        <option value="customer_service">Customer Service</option>
+        <option value="management">Management</option>
+        <option value="front_desk">Front Desk</option>
+      </select>
+    </div>
+    <div class="flex">
+      <input type="date" id="allRequestsStartDate" placeholder="Filter Start Date">
+      <input type="date" id="allRequestsEndDate" placeholder="Filter End Date">
+      <input type="number" id="allRequestsPage" placeholder="Page" value="1" min="1">
+      <input type="number" id="allRequestsLimit" placeholder="Limit" value="10" min="1">
+    </div>
+    <button onclick="getAllLeaveRequests()">Get All Requests</button>
+    <div id="allRequestsResult" class="result"></div>
+  </div>
+
+  <!-- Get Leave Request by ID -->
+  <div class="container">
+    <h2>Get Leave Request by ID</h2>
+    <div class="flex">
+      <input type="text" id="requestId" placeholder="Leave Request ID">
+      <button onclick="getLeaveRequestById()">Get Request</button>
+    </div>
+    <div id="getByIdResult" class="result"></div>
+  </div>
+
+  <!-- Update Leave Request -->
+  <div class="container">
+    <h2>Update Leave Request (Pending Only)</h2>
+    <div class="flex">
+      <input type="text" id="updateRequestId" placeholder="Leave Request ID">
+      <select id="updateLeaveType">
+        <option value="">Keep Current Type</option>
+        <option value="annual">Annual</option>
+        <option value="sick">Sick</option>
+        <option value="emergency">Emergency</option>
+        <option value="maternity">Maternity</option>
+        <option value="paternity">Paternity</option>
+        <option value="unpaid">Unpaid</option>
+      </select>
+    </div>
+    <div class="flex">
+      <input type="date" id="updateStartDate" placeholder="New Start Date">
+      <input type="date" id="updateEndDate" placeholder="New End Date">
+    </div>
+    <textarea id="updateReason" placeholder="New reason for leave" rows="3"></textarea>
+    <button onclick="updateLeaveRequest()">Update Request</button>
+    <div id="updateResult" class="result"></div>
+  </div>
+
+  <!-- Approve/Reject Leave Request (Admin/Manager) -->
+  <div class="container">
+    <h2>Approve/Reject Leave Request (Admin/Manager Only)</h2>
+    <div class="flex">
+      <input type="text" id="approveRequestId" placeholder="Leave Request ID">
+      <button onclick="approveLeaveRequest()">Approve</button>
+      <button onclick="rejectLeaveRequest()" style="background: #dc3545;">Reject</button>
+    </div>
+    <textarea id="rejectionReason" placeholder="Rejection reason (required for rejection)" rows="2"></textarea>
+    <div id="approveRejectResult" class="result"></div>
+  </div>
+
+  <!-- Delete Leave Request -->
+  <div class="container">
+    <h2>Delete Leave Request (Pending Only)</h2>
+    <div class="flex">
+      <input type="text" id="deleteRequestId" placeholder="Leave Request ID">
+      <button onclick="deleteLeaveRequest()" style="background: #dc3545;">Delete Request</button>
+    </div>
+    <div id="deleteResult" class="result"></div>
+  </div>
+
+  <!-- Leave Statistics (Admin/Manager) -->
+  <div class="container">
+    <h2>Leave Statistics (Admin/Manager Only)</h2>
+    <div class="flex">
+      <input type="date" id="statsStartDate" placeholder="Start Date (optional)">
+      <input type="date" id="statsEndDate" placeholder="End Date (optional)">
+      <button onclick="getLeaveStats()">Get Statistics</button>
+    </div>
+    <div id="statsResult" class="result"></div>
+  </div>
+
+  <!-- Upcoming Leaves (Admin/Manager) -->
+  <div class="container">
+    <h2>Upcoming Leaves (Admin/Manager Only)</h2>
+    <div class="flex">
+      <input type="number" id="upcomingDays" placeholder="Days ahead (default: 30)" value="30" min="1">
+      <button onclick="getUpcomingLeaves()">Get Upcoming Leaves</button>
+    </div>
+    <div id="upcomingResult" class="result"></div>
+  </div>
+
+  <script>
+    const baseURL = 'http://localhost:5000/api/v1/leave-requests';
+    let authToken = '';
+
+    function setAuthToken() {
+      authToken = document.getElementById('authToken').value;
+      document.getElementById('currentToken').textContent = authToken ? 'Set' : 'Not set';
+    }
+
+    function getHeaders() {
+      return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      };
+    }
+
+    function displayResult(elementId, data, success = true) {
+      const element = document.getElementById(elementId);
+      element.textContent = JSON.stringify(data, null, 2);
+      element.className = success ? 'result success' : 'result error';
+    }
+
+    async function createLeaveRequest() {
+      try {
+        const data = {
+          leaveType: document.getElementById('leaveType').value,
+          startDate: document.getElementById('startDate').value,
+          endDate: document.getElementById('endDate').value,
+          reason: document.getElementById('reason').value
+        };
+
+        const response = await fetch(baseURL, {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        displayResult('createResult', result, response.ok);
+      } catch (error) {
+        displayResult('createResult', { error: error.message }, false);
+      }
+    }
+
+    async function getMyLeaveRequests() {
+      try {
+        const params = new URLSearchParams();
+        const status = document.getElementById('myRequestsStatus').value;
+        const page = document.getElementById('myRequestsPage').value;
+        const limit = document.getElementById('myRequestsLimit').value;
+
+        if (status) params.append('status', status);
+        if (page) params.append('page', page);
+        if (limit) params.append('limit', limit);
+
+        const response = await fetch(`${baseURL}/my-requests?${params}`, {
+          headers: getHeaders()
+        });
+
+        const result = await response.json();
+        displayResult('myRequestsResult', result, response.ok);
+      } catch (error) {
+        displayResult('myRequestsResult', { error: error.message }, false);
+      }
+    }
+
+    async function getAllLeaveRequests() {
+      try {
+        const params = new URLSearchParams();
+        const status = document.getElementById('allRequestsStatus').value;
+        const leaveType = document.getElementById('allRequestsType').value;
+        const department = document.getElementById('department').value;
+        const startDate = document.getElementById('allRequestsStartDate').value;
+        const endDate = document.getElementById('allRequestsEndDate').value;
+        const page = document.getElementById('allRequestsPage').value;
+        const limit = document.getElementById('allRequestsLimit').value;
+
+        if (status) params.append('status', status);
+        if (leaveType) params.append('leaveType', leaveType);
+        if (department) params.append('department', department);
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+        if (page) params.append('page', page);
+        if (limit) params.append('limit', limit);
+
+        const response = await fetch(`${baseURL}?${params}`, {
+          headers: getHeaders()
+        });
+
+        const result = await response.json();
+        displayResult('allRequestsResult', result, response.ok);
+      } catch (error) {
+        displayResult('allRequestsResult', { error: error.message }, false);
+      }
+    }
+
+    async function getLeaveRequestById() {
+      try {
+        const id = document.getElementById('requestId').value;
+        const response = await fetch(`${baseURL}/${id}`, {
+          headers: getHeaders()
+        });
+
+        const result = await response.json();
+        displayResult('getByIdResult', result, response.ok);
+      } catch (error) {
+        displayResult('getByIdResult', { error: error.message }, false);
+      }
+    }
+
+    async function updateLeaveRequest() {
+      try {
+        const id = document.getElementById('updateRequestId').value;
+        const data = {};
+
+        const leaveType = document.getElementById('updateLeaveType').value;
+        const startDate = document.getElementById('updateStartDate').value;
+        const endDate = document.getElementById('updateEndDate').value;
+        const reason = document.getElementById('updateReason').value;
+
+        if (leaveType) data.leaveType = leaveType;
+        if (startDate) data.startDate = startDate;
+        if (endDate) data.endDate = endDate;
+        if (reason) data.reason = reason;
+
+        const response = await fetch(`${baseURL}/${id}`, {
+          method: 'PATCH',
+          headers: getHeaders(),
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        displayResult('updateResult', result, response.ok);
+      } catch (error) {
+        displayResult('updateResult', { error: error.message }, false);
+      }
+    }
+
+    async function approveLeaveRequest() {
+      try {
+        const id = document.getElementById('approveRequestId').value;
+        const response = await fetch(`${baseURL}/${id}/approve`, {
+          method: 'PATCH',
+          headers: getHeaders()
+        });
+
+        const result = await response.json();
+        displayResult('approveRejectResult', result, response.ok);
+      } catch (error) {
+        displayResult('approveRejectResult', { error: error.message }, false);
+      }
+    }
+
+    async function rejectLeaveRequest() {
+      try {
+        const id = document.getElementById('approveRequestId').value;
+        const rejectionReason = document.getElementById('rejectionReason').value;
+
+        const response = await fetch(`${baseURL}/${id}/reject`, {
+          method: 'PATCH',
+          headers: getHeaders(),
+          body: JSON.stringify({ rejectionReason })
+        });
+
+        const result = await response.json();
+        displayResult('approveRejectResult', result, response.ok);
+      } catch (error) {
+        displayResult('approveRejectResult', { error: error.message }, false);
+      }
+    }
+
+    async function deleteLeaveRequest() {
+      try {
+        const id = document.getElementById('deleteRequestId').value;
+        const response = await fetch(`${baseURL}/${id}`, {
+          method: 'DELETE',
+          headers: getHeaders()
+        });
+
+        const result = await response.json();
+        displayResult('deleteResult', result, response.ok);
+      } catch (error) {
+        displayResult('deleteResult', { error: error.message }, false);
+      }
+    }
+
+    async function getLeaveStats() {
+      try {
+        const params = new URLSearchParams();
+        const startDate = document.getElementById('statsStartDate').value;
+        const endDate = document.getElementById('statsEndDate').value;
+
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+
+        const response = await fetch(`${baseURL}/stats?${params}`, {
+          headers: getHeaders()
+        });
+
+        const result = await response.json();
+        displayResult('statsResult', result, response.ok);
+      } catch (error) {
+        displayResult('statsResult', { error: error.message }, false);
+      }
+    }
+
+    async function getUpcomingLeaves() {
+      try {
+        const days = document.getElementById('upcomingDays').value;
+        const params = new URLSearchParams();
+        if (days) params.append('days', days);
+
+        const response = await fetch(`${baseURL}/upcoming?${params}`, {
+          headers: getHeaders()
+        });
+
+        const result = await response.json();
+        displayResult('upcomingResult', result, response.ok);
+      } catch (error) {
+        displayResult('upcomingResult', { error: error.message }, false);
+      }
+    }
+  </script>
+</body>
+
+</html>

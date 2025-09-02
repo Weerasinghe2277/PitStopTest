@@ -94,7 +94,7 @@ VehicleSchema.pre("save", async function (next) {
 });
 
 VehicleSchema.index({ owner: 1 });
-VehicleSchema.index({ registrationNumber: 1 });
+//VehicleSchema.index({ registrationNumber: 1 });
 
 
 export const Vehicle = mongoose.model("Vehicle", VehicleSchema);

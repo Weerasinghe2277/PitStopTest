@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Management API Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+
+    .container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    textarea {
+      height: 80px;
+      resize: vertical;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .response {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      padding: 15px;
+      margin-top: 15px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .error {
+      background-color: #f8d7da;
+      border-color: #f5c6cb;
+      color: #721c24;
+    }
+
+    .success {
+      background-color: #d4edda;
+      border-color: #c3e6cb;
+      color: #155724;
+    }
+
+    .auth-section {
+      background-color: #e9ecef;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Job Management API Test Interface</h1>
+
+  <!-- Authentication Section -->
+  <div class="container auth-section">
+    <h2>Authentication</h2>
+    <div class="form-group">
+      <label for="authToken">JWT Token:</label>
+      <input type="text" id="authToken" placeholder="Enter your JWT token here">
+    </div>
+    <div class="form-group">
+      <label for="baseUrl">Base URL:</label>
+      <input type="text" id="baseUrl" value="http://localhost:5000/api/v1/jobs" placeholder="API base URL">
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Create Job Section -->
+    <div class="container">
+      <h2>Create Job</h2>
+      <div class="form-group">
+        <label for="bookingId">Booking ID:</label>
+        <input type="text" id="bookingId" placeholder="Booking ObjectId">
+      </div>
+      <div class="form-group">
+        <label for="jobTitle">Job Title:</label>
+        <input type="text" id="jobTitle" placeholder="Job title">
+      </div>
+      <div class="form-group">
+        <label for="jobDescription">Description:</label>
+        <textarea id="jobDescription" placeholder="Job description"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="jobCategory">Category:</label>
+        <select id="jobCategory">
+          <option value="mechanical">Mechanical</option>
+          <option value="electrical">Electrical</option>
+          <option value="bodywork">Bodywork</option>
+          <option value="detailing">Detailing</option>
+          <option value="inspection">Inspection</option>
+          <option value="repair">Repair</option>
+          <option value="maintenance">Maintenance</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="jobPriority">Priority:</label>
+        <select id="jobPriority">
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+          <option value="urgent">Urgent</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="estimatedHours">Estimated Hours:</label>
+        <input type="number" id="estimatedHours" step="0.5" min="0" placeholder="Estimated hours">
+      </div>
+      <div class="form-group">
+        <label for="estimatedCost">Estimated Cost:</label>
+        <input type="number" id="estimatedCost" step="0.01" min="0" placeholder="Estimated cost">
+      </div>
+      <button onclick="createJob()">Create Job</button>
+      <div id="createJobResponse" class="response" style="display: none;"></div>
+    </div>
+
+    <!-- Get All Jobs Section -->
+    <div class="container">
+      <h2>Get All Jobs</h2>
+      <div class="form-group">
+        <label for="statusFilter">Status Filter:</label>
+        <select id="statusFilter" multiple>
+          <option value="pending">Pending</option>
+          <option value="working">Working</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+          <option value="on_hold">On Hold</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="categoryFilter">Category Filter:</label>
+        <select id="categoryFilter" multiple>
+          <option value="mechanical">Mechanical</option>
+          <option value="electrical">Electrical</option>
+          <option value="bodywork">Bodywork</option>
+          <option value="detailing">Detailing</option>
+          <option value="inspection">Inspection</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="searchQuery">Search:</label>
+        <input type="text" id="searchQuery" placeholder="Search jobs by title, description, or job ID">
+      </div>
+      <button onclick="getAllJobs()">Get All Jobs</button>
+      <button onclick="getMyJobs()">Get My Jobs</button>
+      <div id="getAllJobsResponse" class="response" style="display: none;"></div>
+    </div>
+
+    <!-- Get Job by ID Section -->
+    <div class="container">
+      <h2>Get Job by ID</h2>
+      <div class="form-group">
+        <label for="getJobId">Job ID:</label>
+        <input type="text" id="getJobId" placeholder="Job ObjectId or Job ID">
+      </div>
+      <button onclick="getJobById()">Get Job</button>
+      <div id="getJobResponse" class="response" style="display: none;"></div>
+    </div>
+
+    <!-- Update Job Status Section -->
+    <div class="container">
+      <h2>Update Job Status</h2>
+      <div class="form-group">
+        <label for="updateJobId">Job ID:</label>
+        <input type="text" id="updateJobId" placeholder="Job ObjectId">
+      </div>
+      <div class="form-group">
+        <label for="newStatus">New Status:</label>
+        <select id="newStatus">
+          <option value="pending">Pending</option>
+          <option value="working">Working</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+          <option value="on_hold">On Hold</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="statusNotes">Notes:</label>
+        <textarea id="statusNotes" placeholder="Optional notes about status change"></textarea>
+      </div>
+      <button onclick="updateJobStatus()">Update Status</button>
+      <div id="updateStatusResponse" class="response" style="display: none;"></div>
+    </div>
+
+    <!-- Assign Labourers Section -->
+    <div class="container">
+      <h2>Assign Labourers</h2>
+      <div class="form-group">
+        <label for="assignJobId">Job ID:</label>
+        <input type="text" id="assignJobId" placeholder="Job ObjectId">
+      </div>
+      <div class="form-group">
+        <label for="labourerIds">Labourer IDs (comma separated):</label>
+        <input type="text" id="labourerIds" placeholder="ObjectId1, ObjectId2, ...">
+      </div>
+      <button onclick="assignLabourers()">Assign Labourers</button>
+      <div id="assignResponse" class="response" style="display: none;"></div>
+    </div>
+
+    <!-- Add Work Log Section -->
+    <div class="container">
+      <h2>Add Work Log</h2>
+      <div class="form-group">
+        <label for="workLogJobId">Job ID:</label>
+        <input type="text" id="workLogJobId" placeholder="Job ObjectId">
+      </div>
+      <div class="form-group">
+        <label for="startTime">Start Time:</label>
+        <input type="datetime-local" id="startTime">
+      </div>
+      <div class="form-group">
+        <label for="endTime">End Time:</label>
+        <input type="datetime-local" id="endTime">
+      </div>
+      <div class="form-group">
+        <label for="workDescription">Work Description:</label>
+        <textarea id="workDescription" placeholder="Description of work performed"></textarea>
+      </div>
+      <button onclick="addWorkLog()">Add Work Log</button>
+      <div id="workLogResponse" class="response" style="display: none;"></div>
+    </div>
+
+    <!-- Add Inspection Report Section -->
+    <div class="container">
+      <h2>Add Inspection Report</h2>
+      <div class="form-group">
+        <label for="inspectionJobId">Job ID:</label>
+        <input type="text" id="inspectionJobId" placeholder="Job ObjectId">
+      </div>
+      <div class="form-group">
+        <label for="inspectionType">Inspection Type:</label>
+        <select id="inspectionType">
+          <option value="pre">Pre-Work Inspection</option>
+          <option value="post">Post-Work Inspection</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="condition">Condition:</label>
+        <input type="text" id="condition" placeholder="Overall condition">
+      </div>
+      <div class="form-group">
+        <label for="issues">Issues (comma separated):</label>
+        <input type="text" id="issues" placeholder="Issue1, Issue2, ...">
+      </div>
+      <div class="form-group">
+        <label for="qualityRating">Quality Rating (1-5, for post-work only):</label>
+        <input type="number" id="qualityRating" min="1" max="5">
+      </div>
+      <div class="form-group">
+        <label for="approved">Approved (for post-work only):</label>
+        <input type="checkbox" id="approved">
+      </div>
+      <button onclick="addInspectionReport()">Add Inspection Report</button>
+      <div id="inspectionResponse" class="response" style="display: none;"></div>
+    </div>
+
+    <!-- Job Statistics Section -->
+    <div class="container">
+      <h2>Job Statistics</h2>
+      <button onclick="getJobStats()">Get Job Statistics</button>
+      <div id="statsResponse" class="response" style="display: none;"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = () => document.getElementById('baseUrl').value || 'http://localhost:5000/api/v1/jobs';
+    const getAuthHeaders = () => {
+      const token = document.getElementById('authToken').value;
+      return token ? { 'Authorization': `Bearer ${token}` } : {};
+    };
+
+    const makeRequest = async (url, options = {}) => {
+      try {
+        const response = await fetch(url, {
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeaders(),
+            ...options.headers
+          },
+          ...options
+        });
+
+        const data = await response.json();
+        return { response, data };
+      } catch (error) {
+        return { error: error.message };
+      }
+    };
+
+    const displayResponse = (elementId, response, data, error) => {
+      const element = document.getElementById(elementId);
+      element.style.display = 'block';
+
+      if (error) {
+        element.className = 'response error';
+        element.textContent = `Error: ${error}`;
+      } else {
+        element.className = response.ok ? 'response success' : 'response error';
+        element.textContent = JSON.stringify(data, null, 2);
+      }
+    };
+
+    const createJob = async () => {
+      const bookingId = document.getElementById('bookingId').value;
+      const jobData = {
+        title: document.getElementById('jobTitle').value,
+        description: document.getElementById('jobDescription').value,
+        category: document.getElementById('jobCategory').value,
+        priority: document.getElementById('jobPriority').value,
+        estimatedHours: parseFloat(document.getElementById('estimatedHours').value) || 0,
+        estimatedCost: parseFloat(document.getElementById('estimatedCost').value) || 0
+      };
+
+      const url = bookingId ? `${API_BASE()}/booking/${bookingId}` : API_BASE();
+      const { response, data, error } = await makeRequest(url, {
+        method: 'POST',
+        body: JSON.stringify(jobData)
+      });
+
+      displayResponse('createJobResponse', response, data, error);
+    };
+
+    const getAllJobs = async () => {
+      const params = new URLSearchParams();
+
+      const status = Array.from(document.getElementById('statusFilter').selectedOptions)
+        .map(option => option.value).join(',');
+      const category = Array.from(document.getElementById('categoryFilter').selectedOptions)
+        .map(option => option.value).join(',');
+      const search = document.getElementById('searchQuery').value;
+
+      if (status) params.append('status', status);
+      if (category) params.append('category', category);
+      if (search) params.append('search', search);
+
+      const { response, data, error } = await makeRequest(`${API_BASE()}?${params}`);
+      displayResponse('getAllJobsResponse', response, data, error);
+    };
+
+    const getMyJobs = async () => {
+      const { response, data, error } = await makeRequest(`${API_BASE()}/my-jobs`);
+      displayResponse('getAllJobsResponse', response, data, error);
+    };
+
+    const getJobById = async () => {
+      const jobId = document.getElementById('getJobId').value;
+      if (!jobId) {
+        alert('Please enter a Job ID');
+        return;
+      }
+
+      const { response, data, error } = await makeRequest(`${API_BASE()}/${jobId}`);
+      displayResponse('getJobResponse', response, data, error);
+    };
+
+    const updateJobStatus = async () => {
+      const jobId = document.getElementById('updateJobId').value;
+      const status = document.getElementById('newStatus').value;
+      const notes = document.getElementById('statusNotes').value;
+
+      if (!jobId) {
+        alert('Please enter a Job ID');
+        return;
+      }
+
+      const updateData = { status };
+      if (notes) updateData.notes = notes;
+
+      const { response, data, error } = await makeRequest(`${API_BASE()}/${jobId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify(updateData)
+      });
+
+      displayResponse('updateStatusResponse', response, data, error);
+    };
+
+    const assignLabourers = async () => {
+      const jobId = document.getElementById('assignJobId').value;
+      const labourerIdsStr = document.getElementById('labourerIds').value;
+
+      if (!jobId || !labourerIdsStr) {
+        alert('Please enter Job ID and Labourer IDs');
+        return;
+      }
+
+      const labourerIds = labourerIdsStr.split(',').map(id => id.trim()).filter(id => id);
+
+      const { response, data, error } = await makeRequest(`${API_BASE()}/${jobId}/assign-labourers`, {
+        method: 'PATCH',
+        body: JSON.stringify({ labourerIds })
+      });
+
+      displayResponse('assignResponse', response, data, error);
+    };
+
+    const addWorkLog = async () => {
+      const jobId = document.getElementById('workLogJobId').value;
+      const startTime = document.getElementById('startTime').value;
+      const endTime = document.getElementById('endTime').value;
+      const description = document.getElementById('workDescription').value;
+
+      if (!jobId || !startTime || !endTime) {
+        alert('Please fill in Job ID, start time, and end time');
+        return;
+      }
+
+      const workLogData = {
+        startTime: new Date(startTime).toISOString(),
+        endTime: new Date(endTime).toISOString(),
+        description
+      };
+
+      const { response, data, error } = await makeRequest(`${API_BASE()}/${jobId}/work-log`, {
+        method: 'POST',
+        body: JSON.stringify(workLogData)
+      });
+
+      displayResponse('workLogResponse', response, data, error);
+    };
+
+    const addInspectionReport = async () => {
+      const jobId = document.getElementById('inspectionJobId').value;
+      const type = document.getElementById('inspectionType').value;
+      const condition = document.getElementById('condition').value;
+      const issuesStr = document.getElementById('issues').value;
+      const qualityRating = document.getElementById('qualityRating').value;
+      const approved = document.getElementById('approved').checked;
+
+      if (!jobId || !condition) {
+        alert('Please enter Job ID and condition');
+        return;
+      }
+
+      const inspectionData = {
+        type,
+        condition,
+        issues: issuesStr ? issuesStr.split(',').map(issue => issue.trim()) : []
+      };
+
+      if (type === 'post') {
+        if (qualityRating) inspectionData.qualityRating = parseInt(qualityRating);
+        inspectionData.approved = approved;
+      }
+
+      const { response, data, error } = await makeRequest(`${API_BASE()}/${jobId}/inspection`, {
+        method: 'POST',
+        body: JSON.stringify(inspectionData)
+      });
+
+      displayResponse('inspectionResponse', response, data, error);
+    };
+
+    const getJobStats = async () => {
+      const { response, data, error } = await makeRequest(`${API_BASE()}/stats`);
+      displayResponse('statsResponse', response, data, error);
+    };
+
+    // Set default datetime values
+    const now = new Date();
+    const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
+
+    document.getElementById('startTime').value = now.toISOString().slice(0, 16);
+    document.getElementById('endTime').value = oneHourLater.toISOString().slice(0, 16);
+  </script>
+</body>
+
+</html>

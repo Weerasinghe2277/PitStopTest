@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking API Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    h1,
+    h2 {
+      color: #333;
+    }
+
+    form {
+      margin: 10px 0;
+    }
+
+    input,
+    select,
+    textarea,
+    button {
+      margin: 5px;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .response {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      padding: 10px;
+      margin-top: 10px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .error {
+      background-color: #f8d7da;
+      border-color: #f5c6cb;
+      color: #721c24;
+    }
+
+    .success {
+      background-color: #d4edda;
+      border-color: #c3e6cb;
+      color: #155724;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="datetime-local"],
+    select,
+    textarea {
+      width: 200px;
+    }
+
+    textarea {
+      height: 60px;
+      resize: vertical;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Booking API Test Interface</h1>
+
+  <!-- Authentication Section -->
+  <div class="container">
+    <h2>Authentication</h2>
+    <form id="loginForm">
+      <input type="email" id="loginEmail" placeholder="Email" required>
+      <input type="password" id="loginPassword" placeholder="Password" required>
+      <button type="submit">Login</button>
+    </form>
+    <div id="authResponse" class="response"></div>
+    <p><strong>Token:</strong> <span id="tokenDisplay">Not logged in</span></p>
+  </div>
+
+  <!-- Create Booking -->
+  <div class="container">
+    <h2>Create Booking</h2>
+    <form id="createBookingForm">
+      <input type="text" id="customerId" placeholder="Customer ID" required>
+      <input type="text" id="vehicleId" placeholder="Vehicle ID" required>
+      <select id="serviceType" required>
+        <option value="">Select Service Type</option>
+        <option value="inspection">Inspection</option>
+        <option value="repair">Repair</option>
+        <option value="maintenance">Maintenance</option>
+        <option value="bodywork">Bodywork</option>
+        <option value="detailing">Detailing</option>
+      </select>
+      <input type="datetime-local" id="scheduledDate" required>
+      <select id="timeSlot" required>
+        <option value="">Select Time Slot</option>
+        <option value="09:00-11:00">09:00-11:00</option>
+        <option value="11:00-13:00">11:00-13:00</option>
+        <option value="13:00-15:00">13:00-15:00</option>
+        <option value="15:00-17:00">15:00-17:00</option>
+      </select>
+      <select id="priority">
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+        <option value="high">High</option>
+        <option value="urgent">Urgent</option>
+      </select>
+      <textarea id="description" placeholder="Description"></textarea>
+      <button type="submit">Create Booking</button>
+    </form>
+    <div id="createBookingResponse" class="response"></div>
+  </div>
+
+  <!-- Get All Bookings -->
+  <div class="container">
+    <h2>Get All Bookings</h2>
+    <form id="getAllBookingsForm">
+      <select id="filterStatus">
+        <option value="">All Statuses</option>
+        <option value="pending">Pending</option>
+        <option value="inspecting">Inspecting</option>
+        <option value="working">Working</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      <select id="filterServiceType">
+        <option value="">All Service Types</option>
+        <option value="inspection">Inspection</option>
+        <option value="repair">Repair</option>
+        <option value="maintenance">Maintenance</option>
+        <option value="bodywork">Bodywork</option>
+        <option value="detailing">Detailing</option>
+      </select>
+      <input type="number" id="page" placeholder="Page (default: 1)" min="1">
+      <input type="number" id="limit" placeholder="Limit (default: 10)" min="1">
+      <button type="submit">Get Bookings</button>
+    </form>
+    <div id="getAllBookingsResponse" class="response"></div>
+  </div>
+
+  <!-- Get Booking by ID -->
+  <div class="container">
+    <h2>Get Booking by ID</h2>
+    <form id="getBookingForm">
+      <input type="text" id="getBookingId" placeholder="Booking ID" required>
+      <button type="submit">Get Booking</button>
+    </form>
+    <div id="getBookingResponse" class="response"></div>
+  </div>
+
+  <!-- Assign Inspector -->
+  <div class="container">
+    <h2>Assign Inspector</h2>
+    <form id="assignInspectorForm">
+      <input type="text" id="assignBookingId" placeholder="Booking ID" required>
+      <input type="text" id="inspectorId" placeholder="Inspector ID" required>
+      <button type="submit">Assign Inspector</button>
+    </form>
+    <div id="assignInspectorResponse" class="response"></div>
+  </div>
+
+  <!-- Update Booking Status -->
+  <div class="container">
+    <h2>Update Booking Status</h2>
+    <form id="updateStatusForm">
+      <input type="text" id="statusBookingId" placeholder="Booking ID" required>
+      <select id="newStatus" required>
+        <option value="">Select Status</option>
+        <option value="pending">Pending</option>
+        <option value="inspecting">Inspecting</option>
+        <option value="working">Working</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      <textarea id="statusNote" placeholder="Note (optional)"></textarea>
+      <button type="submit">Update Status</button>
+    </form>
+    <div id="updateStatusResponse" class="response"></div>
+  </div>
+
+  <!-- Get Available Inspectors -->
+  <div class="container">
+    <h2>Get Available Inspectors</h2>
+    <button onclick="getAvailableInspectors()">Get Available Inspectors</button>
+    <div id="inspectorsResponse" class="response"></div>
+  </div>
+
+  <!-- Get Booking Stats -->
+  <div class="container">
+    <h2>Get Booking Statistics</h2>
+    <button onclick="getBookingStats()">Get Booking Stats</button>
+    <div id="statsResponse" class="response"></div>
+  </div>
+
+  <script>
+    const API_BASE = '/api/v1';
+    let authToken = '';
+
+    // Helper function to make API calls
+    async function apiCall(endpoint, method = 'GET', data = null) {
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+      }
+
+      const config = {
+        method,
+        headers,
+      };
+
+      if (data) {
+        config.body = JSON.stringify(data);
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}${endpoint}`, config);
+        const result = await response.json();
+        return { response, result };
+      } catch (error) {
+        return { error: error.message };
+      }
+    }
+
+    // Display response helper
+    function displayResponse(elementId, response, result, error) {
+      const element = document.getElementById(elementId);
+      element.className = 'response';
+
+      if (error) {
+        element.className += ' error';
+        element.textContent = `Error: ${error}`;
+        return;
+      }
+
+      if (response.ok) {
+        element.className += ' success';
+      } else {
+        element.className += ' error';
+      }
+
+      element.textContent = JSON.stringify(result, null, 2);
+    }
+
+    // Authentication
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+
+      const { response, result, error } = await apiCall('/users/login', 'POST', { email, password });
+      displayResponse('authResponse', response, result, error);
+
+      if (response?.ok && result?.token) {
+        authToken = result.token;
+        document.getElementById('tokenDisplay').textContent = authToken.substring(0, 50) + '...';
+      }
+    });
+
+    // Create Booking
+    document.getElementById('createBookingForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = {
+        customer: document.getElementById('customerId').value,
+        vehicle: document.getElementById('vehicleId').value,
+        serviceType: document.getElementById('serviceType').value,
+        scheduledDate: document.getElementById('scheduledDate').value,
+        timeSlot: document.getElementById('timeSlot').value,
+        priority: document.getElementById('priority').value,
+        description: document.getElementById('description').value,
+      };
+
+      const { response, result, error } = await apiCall('/bookings', 'POST', data);
+      displayResponse('createBookingResponse', response, result, error);
+    });
+
+    // Get All Bookings
+    document.getElementById('getAllBookingsForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const params = new URLSearchParams();
+
+      const status = document.getElementById('filterStatus').value;
+      const serviceType = document.getElementById('filterServiceType').value;
+      const page = document.getElementById('page').value;
+      const limit = document.getElementById('limit').value;
+
+      if (status) params.append('status', status);
+      if (serviceType) params.append('serviceType', serviceType);
+      if (page) params.append('page', page);
+      if (limit) params.append('limit', limit);
+
+      const queryString = params.toString();
+      const endpoint = `/bookings${queryString ? '?' + queryString : ''}`;
+
+      const { response, result, error } = await apiCall(endpoint);
+      displayResponse('getAllBookingsResponse', response, result, error);
+    });
+
+    // Get Booking by ID
+    document.getElementById('getBookingForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const bookingId = document.getElementById('getBookingId').value;
+
+      const { response, result, error } = await apiCall(`/bookings/${bookingId}`);
+      displayResponse('getBookingResponse', response, result, error);
+    });
+
+    // Assign Inspector
+    document.getElementById('assignInspectorForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const bookingId = document.getElementById('assignBookingId').value;
+      const inspectorId = document.getElementById('inspectorId').value;
+
+      const { response, result, error } = await apiCall(`/bookings/${bookingId}/assign-inspector`, 'PATCH', { inspectorId });
+      displayResponse('assignInspectorResponse', response, result, error);
+    });
+
+    // Update Status
+    document.getElementById('updateStatusForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const bookingId = document.getElementById('statusBookingId').value;
+      const status = document.getElementById('newStatus').value;
+      const note = document.getElementById('statusNote').value;
+
+      const data = { status };
+      if (note) data.note = note;
+
+      const { response, result, error } = await apiCall(`/bookings/${bookingId}/status`, 'PATCH', data);
+      displayResponse('updateStatusResponse', response, result, error);
+    });
+
+    // Get Available Inspectors
+    async function getAvailableInspectors() {
+      const { response, result, error } = await apiCall('/bookings/available-inspectors');
+      displayResponse('inspectorsResponse', response, result, error);
+    }
+
+    // Get Booking Stats
+    async function getBookingStats() {
+      const { response, result, error } = await apiCall('/bookings/stats/overview');
+      displayResponse('statsResponse', response, result, error);
+    }
+  </script>
+</body>
+
+</html>

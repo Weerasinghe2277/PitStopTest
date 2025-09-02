@@ -171,9 +171,9 @@ const UserSchema = new mongoose.Schema(
         type: String,
         trim: true,
         uppercase: true,
-        required: function () {
-          return ["technician", "service_advisor", "manager", "cashier"].includes(this.role);
-        },
+        // required: function () {
+        //   return ["technician", "service_advisor", "manager", "cashier"].includes(this.role);
+        // },
       },
       department: {
         type: String,
@@ -195,7 +195,8 @@ const UserSchema = new mongoose.Schema(
           "painting",
           "detailing",
           "diagnostics",
-          "hybrid_electric"
+          "hybrid_electric",
+          "customer_relations"
         ],
       }],
       certifications: [{
@@ -399,8 +400,8 @@ UserSchema.pre("save", async function (next) {
   }
 
   // Generate employee ID for staff members
-  if (["technician", "service_advisor", "manager", "cashier"].includes(this.role) && 
-      this.employeeDetails && !this.employeeDetails.employeeId) {
+  if (["technician", "service_advisor", "manager", "cashier"].includes(this.role) &&
+    this.employeeDetails && !this.employeeDetails.employeeId) {
     const deptPrefix = {
       mechanical: "MEC",
       electrical: "ELE",
@@ -410,7 +411,7 @@ UserSchema.pre("save", async function (next) {
       management: "MGT",
       front_desk: "FD"
     };
-    
+
     const prefix = deptPrefix[this.employeeDetails.department];
     if (prefix) {
       const count = await this.constructor.countDocuments({

@@ -26,7 +26,7 @@ router.get("/registration/:registrationNumber", getVehicleByRegistration); // Lo
 // Vehicle CRUD operations
 router.route("/")
   .get(authenticate, getAllVehicles) // All roles can view vehicles
-  .post(authenticate, authorize("admin", "manager", "service_advisor"), createVehicle); // Only staff can create vehicles
+  .post(authenticate, authorize("admin", "manager", "cashier"), createVehicle); // Only staff can create vehicles
 
 // Vehicle statistics (admin/manager only)
 router.get("/stats/overview", authenticate, authorize("admin", "manager"), getVehicleStats);
@@ -37,7 +37,7 @@ router.get("/owner/:ownerId", authenticate, getVehiclesByOwner);
 // Vehicle management by ID
 router.route("/:id")
   .get(authenticate, getVehicleById) // All authenticated users can view vehicle details
-  .patch(authenticate, authorize("admin", "manager", "service_advisor"), updateVehicle) // Staff can update vehicle info
+  .patch(authenticate, authorize("admin", "manager", "cashier"), updateVehicle) // Staff can update vehicle info
   .delete(authenticate, authorize("admin", "manager"), deleteVehicle); // Admin/Manager can delete vehicles
 
 // Specialized vehicle operations

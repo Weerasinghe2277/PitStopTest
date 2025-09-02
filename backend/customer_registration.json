@@ -1,0 +1,41 @@
+{
+  "email": "customer.jane@example.com",
+  "password": "SecurePassword123!",
+  "role": "customer",
+  "profile": {
+    "firstName": "Jane",
+    "lastName": "Fernando",
+    "phoneNumber": "0779876543",
+    "address": {
+      "street": "789 Kandy Road",
+      "city": "Kandy",
+      "province": "Central",
+      "postalCode": "20000"
+    },
+    "nic": "199534567890",
+    "dateOfBirth": "1995-12-10"
+  },
+  "customerDetails": {
+    "loyaltyPoints": 0,
+    "membershipTier": "bronze",
+    "emergencyContact": {
+      "name": "Peter Fernando",
+      "phoneNumber": "0712987654",
+      "relationship": "parent"
+    }
+  },
+  "preferences": {
+    "language": "en",
+    "notifications": {
+      "email": true,
+      "sms": true,
+      "push": true,
+      "marketing": false
+    },
+    "timezone": "Asia/Colombo"
+  },
+  "status": "active",
+  "emailVerified": false,
+  "phoneVerified": false,
+  "twoFactorEnabled": false
+}
