@@ -32,7 +32,7 @@ router.get("/my-jobs", authenticate, authorize("technician"), getMyJobs);
 
 // Jobs by booking ID
 router.get("/booking/:bookingId", authenticate, getJobsByBooking);
-
+                                               
 // Job-specific routes
 router.route("/:id")
   .get(authenticate, getJobById) // All authenticated users can view individual jobs (with role-based access)
